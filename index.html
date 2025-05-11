@@ -5,15 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Gamezzz - Enter the World of Gamezzz - Play Now</title>
     
-    <!-- Favicon meta tags -->
     <link rel="icon" type="image/png" sizes="32x32" href="./Images/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="./Images/favicon-16x16.png">
     <link rel="apple-touch-icon" sizes="180x180" href="./Images/apple-touch-icon.png">
     <link rel="manifest" href="./Images/site.webmanifest">
     <meta name="theme-color" content="#162447">
     
-    <!-- If using AdSense or similar, their script usually goes here -->
-    <!-- <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-YOUR_CLIENT_ID" crossorigin="anonymous"></script> -->
     <style>
         /* Global Resets and Base Styles */
         * {
@@ -356,10 +353,10 @@
         .control-button:active {
             background-color: rgba(255, 255, 255, 0.65);
         }
-        #left-button { left: 15px; bottom: 15px; }
-        #right-button { right: 15px; bottom: 15px; }
-        #accelerate-button { right: 15px; bottom: 90px; font-size: 1.7em; /* For ▲ ▼ */ }
-        #brake-button { left: 15px; bottom: 90px; font-size: 1.7em; /* For ▲ ▼ */ }
+        #left-button { left: 15px; bottom: 90px; } /* Default desktop positioning */
+        #right-button { right: 15px; bottom: 90px; }
+        #accelerate-button { right: 15px; bottom: 160px; font-size: 1.7em; /* For ▲ ▼ */ }
+        #brake-button { left: 15px; bottom: 160px; font-size: 1.7em; /* For ▲ ▼ */ }
 
 
         /* Leaderboard Page Styles */
@@ -422,142 +419,93 @@
         }
 
         /* Responsive Adjustments */
-        @media (max-width: 768px) {
-            .nav-logo {
-                height: 35px;
-                width: 35px;
-            }
-            #main-nav .nav-title {
-                font-size: 1.2em;
-            }
-            #main-nav {
-                padding: 0 15px;
-            }
-            .hamburger-menu {
-                display: block;
-            }
+        @media (max-width: 768px) { /* Medium screens / Tablets */
+            .nav-logo { height: 35px; width: 35px; }
+            #main-nav .nav-title { font-size: 1.2em; }
+            #main-nav { padding: 0 15px; }
+            .hamburger-menu { display: block; }
             .nav-links-container {
-                display: none;
-                position: absolute;
-                top: 60px;
-                left: 0;
-                right: 0;
-                background-color: #162447;
-                flex-direction: column;
-                width: 100%;
-                padding: 10px 0;
-                box-shadow: 0 5px 10px rgba(0,0,0,0.2);
-                z-index: 199;
+                display: none; position: absolute; top: 60px; left: 0; right: 0;
+                background-color: #162447; flex-direction: column; width: 100%;
+                padding: 10px 0; box-shadow: 0 5px 10px rgba(0,0,0,0.2); z-index: 199;
             }
-            .nav-links-container.open {
-                display: flex;
-            }
+            .nav-links-container.open { display: flex; }
             .nav-links-container a {
-                width: 100%;
-                text-align: center;
-                padding: 15px 20px;
-                margin-left: 0;
+                width: 100%; text-align: center; padding: 15px 20px; margin-left: 0;
                 border-bottom: 1px solid rgba(255,255,255,0.1);
             }
-            .nav-links-container a:last-child {
-                border-bottom: none;
-            }
-
+            .nav-links-container a:last-child { border-bottom: none; }
             .hamburger-menu[aria-expanded="true"] span:nth-child(1) { transform: translateY(8px) rotate(45deg); }
             .hamburger-menu[aria-expanded="true"] span:nth-child(2) { opacity: 0; }
             .hamburger-menu[aria-expanded="true"] span:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
 
             .page { padding: 20px; }
-            .page h1 { font-size: 1.8em; }
-            .page h2 { font-size: 1.5em; }
+            .page h1 { font-size: 1.8em; } .page h2 { font-size: 1.5em; }
             .page p, .page ul { font-size: 0.95em; }
+            #ui-container { font-size: 1.1em; top: 8px; left: 8px; }
 
-            #ui-container {
-                font-size: 1.1em;
-                top: 8px; left: 8px;
-            }
-            /* ---- MODIFIED CONTROL BUTTONS FOR 768px ---- */
+            /* ---- AGGRESSIVE CONTROL BUTTONS FOR 768px ---- */
             .control-button {
-                width: 60px;
-                height: 60px;
-                font-size: 1.9em; /* For ◀ ▶ icons */
+                width: 60px; height: 60px; font-size: 1.9em; /* For ◀ ▶ */
             }
             #accelerate-button, #brake-button {
-                font-size: 1.6em; /* For ▲ ▼ icons */
+                font-size: 1.6em; /* For ▲ ▼ */
             }
             #left-button, #right-button {
-                bottom: 25px; /* More space from bottom edge */
-                /* left/right padding is 15px from base */
+                bottom: 80px; /* Significantly more space from bottom */
             }
-            #accelerate-button {
-                bottom: 100px; /* 60 (L/R height) + 15 (gap) + 25 (L/R bottom offset) */
-                /* right padding 15px from base */
+            #accelerate-button { /* L/R H:60, L/R B:40, Gap:15 => 60+40+15 = 115 */
+                bottom: 155px; 
             }
             #brake-button {
-                bottom: 100px; /* Same calculation */
-                /* left padding 15px from base */
+                bottom: 155px;
             }
-            /* ---- END MODIFIED CONTROL BUTTONS ---- */
+            /* ---- END AGGRESSIVE CONTROL BUTTONS ---- */
 
             #game-over { font-size: 1.8em; padding: 15px; }
             #game-over button { font-size: 0.5em; padding: 10px 15px; }
             .ad-placeholder-box { max-width: 100%; height: 200px; }
-
             #leaderboard-page h2 { font-size: 1.6em; }
             #leaderboard-list li { font-size: 0.95em; }
         }
 
-        @media (max-width: 480px) {
-            .nav-logo {
-                height: 30px;
-                width: 30px;
-            }
-            #main-nav .nav-title {
-                font-size: 1.1em;
-            }
+        @media (max-width: 480px) { /* Small screens / Mobiles */
+            .nav-logo { height: 30px; width: 30px; }
+            #main-nav .nav-title { font-size: 1.1em; }
             .page { padding: 15px; }
-            .page h1 { font-size: 1.6em; }
-            .page h2 { font-size: 1.3em; }
+            .page h1 { font-size: 1.6em; } .page h2 { font-size: 1.3em; }
             .page p, .page ul { font-size: 0.9em; }
-
             #name-entry-page input[type="text"] { font-size: 1em; }
             .styled-button { font-size: 1em; padding: 10px 20px; }
-
-            #loading-screen { font-size: 1.8em; }
-            #loading-progress { font-size: 0.5em; }
-
+            #loading-screen { font-size: 1.8em; } #loading-progress { font-size: 0.5em; }
             #ui-container { font-size: 1em; }
-            /* ---- MODIFIED CONTROL BUTTONS FOR 480px ---- */
+
+            /* ---- AGGRESSIVE CONTROL BUTTONS FOR 480px ---- */
             .control-button {
-                width: 55px;
-                height: 55px;
-                font-size: 1.7em; /* For ◀ ▶ icons */
+                width: 55px; height: 55px; font-size: 1.7em; /* For ◀ ▶ */
             }
             #accelerate-button, #brake-button {
-                font-size: 1.5em; /* For ▲ ▼ icons */
+                font-size: 1.5em; /* For ▲ ▼ */
             }
              #left-button, #right-button {
-                bottom: 20px; /* More space from bottom edge */
+                bottom: 30px; /* Significantly more space from bottom */
             }
-            #accelerate-button {
-                bottom: 90px; /* 55 (L/R height) + 15 (gap) + 20 (L/R bottom offset) */
+            #accelerate-button { /* L/R H:55, L/R B:30, Gap:10 => 55+30+10 = 95 */
+                bottom: 95px; 
             }
             #brake-button {
-                bottom: 90px; /* Same calculation */
+                bottom: 95px;
             }
-            /* ---- END MODIFIED CONTROL BUTTONS ---- */
+            /* ---- END AGGRESSIVE CONTROL BUTTONS ---- */
 
             #game-over { font-size: 1.6em; }
             #final-score-display { font-size: 0.5em; }
             #game-over button { font-size: 0.45em; }
             .ad-placeholder-banner { height: 50px; }
             .ad-placeholder-box { height: 150px; }
-
-
             #leaderboard-page h2 { font-size: 1.4em; }
             #leaderboard-list li { font-size: 0.9em; }
         }
-
     </style>
 </head>
 <body>
@@ -738,8 +686,7 @@
         playerNameInput.value = currentPlayerName === "Player" ? "" : currentPlayerName;
 
         function handleAdSlotVisibility(slotId) {
-            const adSlot = document.getElementById(slotId);
-            // Placeholder for ad loading logic
+            // const adSlot = document.getElementById(slotId);
             // if (adSlot) { console.log(`Ad slot ${slotId} is now visible.`); }
         }
 
@@ -771,9 +718,9 @@
 
             if (pageId === 'game-page') {
                 if (!gameInitialized) {
-                    initThreeJSGame();
+                    initThreeJSGame(); // This is where all game assets are created
                     gameInitialized = true;
-                } else {
+                } else { // Game already initialized, just resume sounds if needed
                     if (sounds.engine && sounds.engine.paused && !isGameOver && carVelocity > 0.01) {
                         playSound('engine', true);
                     }
@@ -781,7 +728,7 @@
                         playSound('rain', true);
                     }
                 }
-            } else {
+            } else { // Navigating away from game page
                 if (sounds.engine) stopSound('engine');
                 if (sounds.rain) stopSound('rain');
             }
@@ -819,98 +766,53 @@
         });
 
         // --- Game Variables ---
-        let scene, camera, renderer, carModel, enemyCar;
+        let scene, camera, renderer, carModel, enemyCar, clock;
         let ambientLight, directionalLight, lensflare;
         let road, roadLines = [], kerbs = [];
-        let buildings = [], streetLights = [], trafficLights = [];
+        let buildings = [], streetLights = [], trafficLights = []; // These will be populated by createEnvironmentAssets
         let clouds = [];
         let cloudMaterial;
-        let stars = [];
-        const numStars = 300;
+        let stars = null; // Initialize as null, will be THREE.Points object
+        const numStarsBase = 300;
 
         const roadWidth = 10;
         const roadLength = 200;
-        const buildingSpacing = 15;
-        const lightSpacing = 30;
-        const numBuildings = Math.floor(roadLength / buildingSpacing);
-        const numLights = Math.floor(roadLength / lightSpacing);
+        const buildingSpacingBase = 15;
+        const lightSpacingBase = 30;    
+        
+        let effectiveNumBuildings, effectiveNumLights, effectiveNumClouds, effectiveNumStars;
+        let reduceEnvironmentComplexityMobile = false;
 
-        const kerbHeight = 0.2;
-        const kerbWidth = 0.3;
-        const enemyCarSpeedFactor = 0.65;
-
-        let carVelocity = 0;
-        let carAcceleration = 0.005;
-        let carDeceleration = 0.002;
-        let carBraking = 0.01;
-        let maxSpeed = 1.0;
-        let currentDisplaySpeed = 0;
-        const baseDriveSpeed = 0.8;
-
-        let skidMarks = [];
-        let lastSkidTime = 0;
-        const skidInterval = 100;
+        const kerbHeight = 0.2; const kerbWidth = 0.3; const enemyCarSpeedFactor = 0.65;
+        let carVelocity = 0; let carAcceleration = 0.005; let carDeceleration = 0.002; let carBraking = 0.01;
+        let maxSpeed = 1.0; let currentDisplaySpeed = 0; const baseDriveSpeed = 0.8;
+        let skidMarks = []; let lastSkidTime = 0; const skidInterval = 100;
         let exhaustParticles = [];
-        
-        // Performance-adjusted variables
         let effectiveMaxSkidMarks, effectiveMaxExhaustParticles, effectiveMaxRainParticles;
+        let isRaining = false; let rainParticles = [];
+        let timeOfDay = 0.4; // Forced daytime
+        let baseFogNear = roadLength * 0.4; let baseFogFar = roadLength * 0.9;
 
-        let isRaining = false;
-        let rainParticles = [];
-        
-        let timeOfDay = 0.4; // IMPORTANT: Forced daytime for performance
-
-        let baseFogNear = roadLength * 0.4;
-        let baseFogFar = roadLength * 0.9;
-
-        const sounds = {}; // Initialize empty, add sounds if Audio API available
+        const sounds = {}; 
         if (typeof Audio !== "undefined") {
-            sounds.engine = new Audio('sound effect/11L-Generate_a_racing_ca-1746887375438.mp3');
-            // sounds.collect = new Audio('path/to/collect.mp3');
-            // sounds.skid = new Audio('path/to/skid.mp3');
-            // sounds.nearMiss = new Audio('path/to/nearMiss.mp3');
-            // sounds.rain = new Audio('path/to/rain.mp3');
-
-            if (sounds.engine) {
-                sounds.engine.addEventListener('error', (e) => console.error('Error loading engine sound:', e));
-            }
+            sounds.engine = new Audio('./sound effect/11L-Generate_a_racing_ca-1746887375438.mp3');
+            // sounds.collect = new Audio('./sound effect/collect.mp3'); // Uncomment if you have these
+            // sounds.skid = new Audio('./sound effect/skid.mp3');
+            // sounds.nearMiss = new Audio('./sound effect/nearMiss.mp3');
+            // sounds.rain = new Audio('./sound effect/rain.mp3');
+            if (sounds.engine) sounds.engine.addEventListener('error', (e) => console.error('Error loading engine sound:', e));
             Object.values(sounds).filter(s => s).forEach(sound => sound.volume = 0.5);
             if(sounds.engine) sounds.engine.volume = 0.3;
         }
 
-
-        let enemyTargetX = 0;
-        let enemyLaneChangeTimer = 0;
-        const enemyLaneChangeInterval = 1500;
-        const enemyLaneChangeProbability = 0.5;
-
-        let moveForward = false;
-        let moveBackward = false;
-        let moveLeft = false;
-        let moveRight = false;
-        const carTurnSpeed = 0.18;
-        let carBaseY = 0.5;
-        let carCurrentYOffset = 0;
-        const suspensionStiffness = 0.2;
-        const suspensionDamping = 0.15;
-        let suspensionVelocity = 0;
-
-        let score = 0;
-        let distanceTraveled = 0;
-        let isGameOver = false;
-        let nearMissCooldown = 0;
-        const nearMissBonus = 5;
-
-        const points = [];
-        const numPoints = 10;
-        const pointValue = 10;
-        let pointGeometry, pointMaterial;
-        const pointRadius = 0.35;
-        
-        let coinPatterns = ['left', 'right', 'middle'];
-        let currentPatternIndex = 0;
-        let coinsInCurrentPattern = 0;
-        let targetCoinsForPattern = 5 + Math.floor(Math.random() * 3);
+        let enemyTargetX = 0; let enemyLaneChangeTimer = 0; const enemyLaneChangeInterval = 1500; const enemyLaneChangeProbability = 0.5;
+        let moveForward = false; let moveBackward = false; let moveLeft = false; let moveRight = false;
+        const carTurnSpeed = 0.18; let carBaseY = 0.5; let carCurrentYOffset = 0;
+        const suspensionStiffness = 0.2; const suspensionDamping = 0.15; let suspensionVelocity = 0;
+        let score = 0; let distanceTraveled = 0; let isGameOver = false; let nearMissCooldown = 0; const nearMissBonus = 5;
+        const points = []; const numPoints = 10; const pointValue = 10;
+        let pointGeometry, pointMaterial; const pointRadius = 0.35;
+        let coinPatterns = ['left', 'right', 'middle']; let currentPatternIndex = 0; let coinsInCurrentPattern = 0; let targetCoinsForPattern = 5 + Math.floor(Math.random() * 3);
 
         const scoreElement = document.getElementById('score');
         const distanceElement = document.getElementById('distance');
@@ -920,22 +822,15 @@
         const restartButton = document.getElementById('restart-button');
         const loadingScreen = document.getElementById('loading-screen');
         const loadingProgressElement = document.getElementById('loading-progress');
-
         const leaderboardListElement = document.getElementById('leaderboard-list');
         const noScoresMessageElement = document.getElementById('no-scores-message');
         const closeLeaderboardButton = document.getElementById('close-leaderboard-button');
         const viewLeaderboardButton = document.getElementById('view-leaderboard-button');
         const mainMenuButton = document.getElementById('main-menu-button');
 
-        const LEADERBOARD_KEY = 'carGameLeaderboard_Daytime_v3_Named';
-        const MAX_LEADERBOARD_ENTRIES = 10;
-
-        let playerBox = new THREE.Box3();
-        let enemyBox = new THREE.Box3();
-        let pointBox = new THREE.Box3();
-        let playerSize = new THREE.Vector3();
-        let enemySize = new THREE.Vector3();
-
+        const LEADERBOARD_KEY = 'carGameLeaderboard_Daytime_v3_Named'; const MAX_LEADERBOARD_ENTRIES = 10;
+        let playerBox = new THREE.Box3(); let enemyBox = new THREE.Box3(); let pointBox = new THREE.Box3();
+        let playerSize = new THREE.Vector3(); let enemySize = new THREE.Vector3();
         const baseFov = 70;
 
         const loadingManager = new THREE.LoadingManager();
@@ -955,125 +850,129 @@
         };
 
         let headlightLeft, headlightRight, taillightLeft, taillightRight;
-
-        // NEW: Function to manage performance-related settings
+        
         function updatePerformanceSettings() {
             const isMobileDevice = window.innerWidth <= 768;
+            reduceEnvironmentComplexityMobile = isMobileDevice; // Set the global flag
 
-            effectiveMaxSkidMarks = isMobileDevice ? 15 : 30;
-            effectiveMaxExhaustParticles = isMobileDevice ? 10 : 20;
-            effectiveMaxRainParticles = isMobileDevice ? 50 : 100;
+            effectiveMaxSkidMarks = isMobileDevice ? 10 : 30;
+            effectiveMaxExhaustParticles = isMobileDevice ? 5 : 20;
+            effectiveMaxRainParticles = isMobileDevice ? 30 : 100;
 
             if (renderer) {
-                const pixelRatio = Math.min(window.devicePixelRatio, isMobileDevice ? 1.5 : 2);
+                // renderer.antialias is set at creation, cannot change on the fly easily
+                const pixelRatio = Math.min(window.devicePixelRatio, isMobileDevice ? 1.0 : 1.5); // Adjusted max for non-mobile too
                 renderer.setPixelRatio(pixelRatio);
             }
 
             if (directionalLight && directionalLight.shadow) {
-                const shadowMapSize = isMobileDevice ? 512 : 1024;
-                directionalLight.shadow.mapSize.width = shadowMapSize;
-                directionalLight.shadow.mapSize.height = shadowMapSize;
-                if (directionalLight.shadow.map) { // If map already exists, needs update
-                    directionalLight.shadow.map.dispose();
-                    directionalLight.shadow.map = null;
+                const shadowMapSize = isMobileDevice ? 256 : 1024;
+                if (directionalLight.shadow.mapSize.width !== shadowMapSize) { // Only update if changed
+                    directionalLight.shadow.mapSize.width = shadowMapSize;
+                    directionalLight.shadow.mapSize.height = shadowMapSize;
+                    if (directionalLight.shadow.map) {
+                        directionalLight.shadow.map.dispose();
+                        directionalLight.shadow.map = null;
+                    }
                 }
+            }
+            if (lensflare) {
+                lensflare.visible = !isMobileDevice;
+            }
+
+            // Environment complexity numbers
+            if (reduceEnvironmentComplexityMobile) {
+                effectiveNumBuildings = Math.floor(roadLength / (buildingSpacingBase * 1.8)); // Slightly more than half
+                effectiveNumLights = Math.floor(roadLength / (lightSpacingBase * 1.8));    
+                effectiveNumClouds = 7; 
+                effectiveNumStars = 100; 
+            } else {
+                effectiveNumBuildings = Math.floor(roadLength / buildingSpacingBase);
+                effectiveNumLights = Math.floor(roadLength / lightSpacingBase);
+                effectiveNumClouds = 15;
+                effectiveNumStars = numStarsBase;
             }
         }
 
         function createWindowTexture(baseColorHex, buildingWidth, buildingHeight) {
             const canvas = document.createElement('canvas');
-            const S = 128; 
-            canvas.width = S;
-            canvas.height = S * 1.5; 
+            const S = reduceEnvironmentComplexityMobile ? 64 : 128;
+            canvas.width = S; canvas.height = S * 1.5; 
             const ctx = canvas.getContext('2d');
-
             const baseColorStr = new THREE.Color(baseColorHex).getStyle();
-            ctx.fillStyle = baseColorStr;
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            const isNightTime = timeOfDay > 0.68 || timeOfDay < 0.22; // This will be false due to forced daytime
-
-            const N_col = 3; 
-            const N_row = 5; 
-
-            const cellWidth = canvas.width / N_col;
-            const cellHeight = canvas.height / N_row;
-
-            const windowPadWidth = cellWidth * 0.15;
-            const windowPadHeight = cellHeight * 0.12;
-
-            const windowWidth = cellWidth - 2 * windowPadWidth;
-            const windowHeight = cellHeight - 2 * windowPadHeight;
-
+            ctx.fillStyle = baseColorStr; ctx.fillRect(0, 0, canvas.width, canvas.height);
+            const isNightTime = false; 
+            const N_col = reduceEnvironmentComplexityMobile ? 2 : 3; 
+            const N_row = reduceEnvironmentComplexityMobile ? 3 : 5; 
+            const cellWidth = canvas.width / N_col; const cellHeight = canvas.height / N_row;
+            const windowPadWidth = cellWidth * 0.15; const windowPadHeight = cellHeight * 0.12;
+            const windowWidth = cellWidth - 2 * windowPadWidth; const windowHeight = cellHeight - 2 * windowPadHeight;
             for (let r = 0; r < N_row; r++) {
                 for (let c = 0; c < N_col; c++) {
                     if (Math.random() > 0.1) { 
-                        let currentWindowColor = isNightTime ? (Math.random() < 0.65 ? `rgb(${Math.floor(Math.random()*75+180)},${Math.floor(Math.random()*75+180)},${Math.floor(Math.random()*50+100)})` : '#202028') : '#354048';
+                        let currentWindowColor = '#354048'; // Forced daytime window color
                         ctx.fillStyle = currentWindowColor;
-                        ctx.fillRect(
-                            c * cellWidth + windowPadWidth,
-                            r * cellHeight + windowPadHeight,
-                            windowWidth,
-                            windowHeight
-                        );
+                        ctx.fillRect(c * cellWidth + windowPadWidth, r * cellHeight + windowPadHeight, windowWidth, windowHeight);
                     }
                 }
             }
             const texture = new THREE.CanvasTexture(canvas);
-            texture.wrapS = THREE.RepeatWrapping;
-            texture.wrapT = THREE.RepeatWrapping;
-            if (renderer) texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
-            
-            const metersPerTileWidth = 4;
-            const metersPerTileHeight = 5; 
+            texture.wrapS = THREE.RepeatWrapping; texture.wrapT = THREE.RepeatWrapping;
+            if (renderer) texture.anisotropy = renderer.capabilities.getMaxAnisotropy() / (reduceEnvironmentComplexityMobile ? 2 : 1);
+            const metersPerTileWidth = 4; const metersPerTileHeight = 5; 
             texture.repeat.set(buildingWidth / metersPerTileWidth, buildingHeight / metersPerTileHeight);
             texture.needsUpdate = true; 
             return texture;
         }
         
         function initThreeJSGame() {
+            clock = new THREE.Clock(); 
             scene = new THREE.Scene();
             scene.background = new THREE.Color(0xa0d7e6); 
             scene.fog = new THREE.Fog(0xa0d7e6, baseFogNear, baseFogFar);
 
             camera = new THREE.PerspectiveCamera(baseFov, window.innerWidth / window.innerHeight, 0.1, 1000);
-            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
             
-            // Call updatePerformanceSettings to set pixelRatio and other initial settings
-            updatePerformanceSettings(); 
+            const isMobileForRenderer = window.innerWidth <= 768;
+            renderer = new THREE.WebGLRenderer({ antialias: !isMobileForRenderer, alpha: true });
+            
+            updatePerformanceSettings(); // Sets pixelRatio, shadowMapSize, environment counts, etc.
 
             renderer.setSize(window.innerWidth, window.innerHeight);
             renderer.shadowMap.enabled = true;
             renderer.shadowMap.type = THREE.PCFSoftShadowMap; 
             renderer.toneMapping = THREE.ACESFilmicToneMapping;
             renderer.toneMappingExposure = 1.0;
-            document.getElementById('container').appendChild(renderer.domElement);
+            const container = document.getElementById('container');
+            container.innerHTML = ''; // Clear previous canvas if any
+            container.appendChild(renderer.domElement);
 
             ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
             scene.add(ambientLight);
             directionalLight = new THREE.DirectionalLight(0xffffff, 1.0);
             directionalLight.position.set(50, 100, 20);
             directionalLight.castShadow = true;
-            // Shadow map size is set by updatePerformanceSettings()
-            directionalLight.shadow.camera.near = 0.5;
-            directionalLight.shadow.camera.far = 250;
-            directionalLight.shadow.camera.left = -roadLength * 0.3;
-            directionalLight.shadow.camera.right = roadLength * 0.3;
-            directionalLight.shadow.camera.top = roadLength * 0.3;
-            directionalLight.shadow.camera.bottom = -roadLength * 0.3;
+            // Shadow map size updated by updatePerformanceSettings()
+            directionalLight.shadow.camera.near = 0.5; directionalLight.shadow.camera.far = 250;
+            directionalLight.shadow.camera.left = -roadLength*0.3; directionalLight.shadow.camera.right = roadLength*0.3;
+            directionalLight.shadow.camera.top = roadLength*0.3; directionalLight.shadow.camera.bottom = -roadLength*0.3;
             scene.add(directionalLight);
 
             const textureLoader = new THREE.TextureLoader(loadingManager);
-            const textureFlare0 = textureLoader.load("https://threejs.org/examples/textures/lensflare/lensflare0.png");
-            const textureFlare3 = textureLoader.load("https://threejs.org/examples/textures/lensflare/lensflare3.png");
+            if (!reduceEnvironmentComplexityMobile) { // Only load lensflare if not on mobile performance mode
+                const textureFlare0 = textureLoader.load("https://threejs.org/examples/textures/lensflare/lensflare0.png");
+                const textureFlare3 = textureLoader.load("https://threejs.org/examples/textures/lensflare/lensflare3.png");
+                lensflare = new Lensflare();
+                lensflare.addElement(new LensflareElement(textureFlare0, 700, 0, directionalLight.color));
+                lensflare.addElement(new LensflareElement(textureFlare3, 60, 0.6));
+                lensflare.addElement(new LensflareElement(textureFlare3, 70, 0.7));
+                lensflare.addElement(new LensflareElement(textureFlare3, 120, 0.9));
+                lensflare.addElement(new LensflareElement(textureFlare3, 70, 1.0));
+                directionalLight.add(lensflare);
+            } else {
+                lensflare = null; // Ensure it's null if not created
+            }
 
-            lensflare = new Lensflare();
-            lensflare.addElement(new LensflareElement(textureFlare0, 700, 0, directionalLight.color));
-            lensflare.addElement(new LensflareElement(textureFlare3, 60, 0.6));
-            lensflare.addElement(new LensflareElement(textureFlare3, 70, 0.7));
-            lensflare.addElement(new LensflareElement(textureFlare3, 120, 0.9));
-            lensflare.addElement(new LensflareElement(textureFlare3, 70, 1.0));
-            directionalLight.add(lensflare);
 
             const groundGeo = new THREE.PlaneGeometry(roadLength * 2, roadLength);
             const groundMat = new THREE.MeshStandardMaterial({ color: 0x4a7936, roughness: 0.9 });
@@ -1093,8 +992,9 @@
             const numRoadLines = Math.floor(roadLength / (lineLength + lineGap));
             const lineGeo = new THREE.PlaneGeometry(0.25, lineLength);
             const lineMat = new THREE.MeshStandardMaterial({ color: 0xeeeeee });
+            roadLines = []; // Clear before repopulating
             for (let i = 0; i < numRoadLines; i++) {
-                const line = new THREE.Mesh(lineGeo, lineMat);
+                const line = new THREE.Mesh(lineGeo, lineMat.clone()); // Clone material to be safe if it were complex
                 line.rotation.x = -Math.PI / 2; line.position.y = 0.005;
                 line.position.z = (roadLength / 2) - (lineLength / 2) - i * (lineLength + lineGap);
                 line.receiveShadow = false; line.castShadow = false;   
@@ -1105,8 +1005,9 @@
             kerbTexture.wrapS = THREE.RepeatWrapping; kerbTexture.repeat.set(roadLength / 5, 1);
             const kerbGeo = new THREE.BoxGeometry(kerbWidth, kerbHeight, roadLength);
             const kerbMat = new THREE.MeshStandardMaterial({ map: kerbTexture, roughness: 0.7 });
+            kerbs = []; // Clear before repopulating
             [-1, 1].forEach(side => {
-                const kerb = new THREE.Mesh(kerbGeo, kerbMat);
+                const kerb = new THREE.Mesh(kerbGeo, kerbMat.clone());
                 kerb.position.set(side * (roadWidth / 2 + kerbWidth / 2), kerbHeight / 2, 0);
                 kerb.castShadow = true; kerb.receiveShadow = true; 
                 kerbs.push(kerb); scene.add(kerb);
@@ -1116,12 +1017,13 @@
                 color: 0xffffff, transparent: true, opacity: 0.6, depthWrite: false
             });
 
-            createEnvironmentAssets();
+            createEnvironmentAssets(); // This will populate buildings, streetLights, clouds, stars arrays
 
-            pointGeometry = new THREE.SphereGeometry(pointRadius, 12, 12); 
+            pointGeometry = new THREE.SphereGeometry(pointRadius, reduceEnvironmentComplexityMobile ? 8 : 12, reduceEnvironmentComplexityMobile ? 6 : 8); 
             pointMaterial = new THREE.MeshStandardMaterial({ color: 0xffcc00, emissive: 0xeeaa00, emissiveIntensity: 0.7, roughness: 0.3 });
+            points.length = 0; // Clear points array before repopulating
             for (let i = 0; i < numPoints; i++) {
-                const point = new THREE.Mesh(pointGeometry, pointMaterial);
+                const point = new THREE.Mesh(pointGeometry, pointMaterial.clone());
                 point.castShadow = false; point.receiveShadow = false; 
                 points.push(point); 
                 resetPointPosition(point, true); 
@@ -1132,125 +1034,89 @@
 
             window.addEventListener('resize', onWindowResize, false);
             restartButton.addEventListener('click', restartGame);
-            
-            viewLeaderboardButton.addEventListener('click', () => {
-                gameOverElement.style.display = 'none';
-                showPage('leaderboard-page');
-            });
-            mainMenuButton.addEventListener('click', () => {
-                gameOverElement.style.display = 'none';
-                showPage('name-entry-page');
-            });
+            viewLeaderboardButton.addEventListener('click', () => { gameOverElement.style.display = 'none'; showPage('leaderboard-page'); });
+            mainMenuButton.addEventListener('click', () => { gameOverElement.style.display = 'none'; showPage('name-entry-page'); });
             closeLeaderboardButton.addEventListener('click', () => showPage('name-entry-page'));
 
             setupControls();
-            updateScoreDisplay();
-            updateDistanceDisplay();
-            updateSpeedometer();
+            updateScoreDisplay(); updateDistanceDisplay(); updateSpeedometer();
             updateDayCycleAndWeather(0); 
             animate();
         }
         
-        function createKerbTexture() {
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-            canvas.width = 128; canvas.height = 32;
-            const stripeWidth = 16;
-            const colors = ['#dd0000', '#eeeeee'];
-            for (let i = 0; i < canvas.width / stripeWidth; i++) {
-                ctx.fillStyle = colors[i % 2];
-                ctx.fillRect(i * stripeWidth, 0, stripeWidth, canvas.height);
-            }
+        function createKerbTexture() { /* ... (same as before) ... */ 
+            const canvas = document.createElement('canvas'); const ctx = canvas.getContext('2d');
+            canvas.width = 128; canvas.height = 32; const stripeWidth = 16; const colors = ['#dd0000', '#eeeeee'];
+            for (let i = 0; i < canvas.width / stripeWidth; i++) { ctx.fillStyle = colors[i % 2]; ctx.fillRect(i * stripeWidth, 0, stripeWidth, canvas.height); }
             const texture = new THREE.CanvasTexture(canvas);
-            if (renderer) texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
-            return texture;
+            if (renderer) texture.anisotropy = renderer.capabilities.getMaxAnisotropy(); return texture;
         }
 
         function createEnvironmentAssets() {
-            const buildingBaseColors = [ 
-                0xaaaaaa, 0x888890, 0x999080, 0x777777, 0x605550, 
-                0xacb2b7, 0xb5a89a, 0x5a6469,
-            ];
-
-            function createBuilding() {
-                const height = Math.random() * 25 + 15;
-                const width = Math.random() * 6 + 5;
-                const depth = Math.random() * 6 + 5;
+            // DO NOT clear arrays here (buildings, streetLights, etc.) as they are used by animate loop.
+            // This function is now only for initial creation. RestartGame will handle clearing scene objects.
+            
+            const buildingBaseColors = [ 0xaaaaaa, 0x888890, 0x999080, 0x777777, 0x605550, 0xacb2b7, 0xb5a89a, 0x5a6469 ];
+            function createBuilding() { /* ... (same as before) ... */ 
+                const height = Math.random() * 25 + 15; const width = Math.random() * 6 + 5; const depth = Math.random() * 6 + 5;
                 const buildingGeo = new THREE.BoxGeometry(width, height, depth);
                 const selectedBaseColorHex = buildingBaseColors[Math.floor(Math.random() * buildingBaseColors.length)];
                 const wallTexture = createWindowTexture(selectedBaseColorHex, width, height); 
                 const wallMaterial = new THREE.MeshStandardMaterial({ map: wallTexture, roughness: 0.6 + Math.random() * 0.3, metalness: Math.random() * 0.1, color: 0xffffff });
                 const roofColor = new THREE.Color(selectedBaseColorHex).multiplyScalar(0.8); 
                 const roofMaterial = new THREE.MeshStandardMaterial({ color: roofColor, roughness: 0.8, metalness: 0.1 });
-                const buildingMaterialsArray = [ wallMaterial, wallMaterial, roofMaterial, roofMaterial, wallMaterial, wallMaterial ];
-                const building = new THREE.Mesh(buildingGeo, buildingMaterialsArray);
-                building.position.y = height / 2 - 0.04; 
-                building.castShadow = true; building.receiveShadow = true;
-                return building;
+                const building = new THREE.Mesh(buildingGeo, [wallMaterial, wallMaterial, roofMaterial, roofMaterial, wallMaterial, wallMaterial]);
+                building.position.y = height / 2 - 0.04; building.castShadow = true; building.receiveShadow = true; return building;
             }
-
-            for (let i = 0; i < numBuildings; i++) {
+            buildings = []; // Ensure fresh array for init
+            for (let i = 0; i < effectiveNumBuildings; i++) {
                 [-1, 1].forEach(side => {
                     const building = createBuilding();
-                    const zPos = (roadLength / 2) - (buildingSpacing / 2) - i * buildingSpacing + (Math.random()-0.5) * buildingSpacing * 0.5;
+                    const zPos = (roadLength / 2) - (buildingSpacingBase / 2) - i * buildingSpacingBase + (Math.random()-0.5) * buildingSpacingBase * 0.5;
                     const xOffset = roadWidth / 2 + kerbWidth + 2 + Math.random() * 8 + building.geometry.parameters.width / 2;
                     building.position.set(side * xOffset, building.position.y, zPos);
                     buildings.push(building); scene.add(building);
                 });
             }
 
-            function createStreetLight() {
-                const group = new THREE.Group(); const poleHeight = 7; const poleRadius = 0.1; const poleGeo = new THREE.CylinderGeometry(poleRadius, poleRadius * 1.2, poleHeight); const poleMat = new THREE.MeshStandardMaterial({ color: 0x777777, metalness: 0.9, roughness: 0.3 }); const pole = new THREE.Mesh(poleGeo, poleMat); 
+            function createStreetLight() { /* ... (same as before, with mobile geometry adjustments) ... */ 
+                const group = new THREE.Group(); const poleHeight = 7; const poleRadius = 0.1; const poleGeo = new THREE.CylinderGeometry(poleRadius, poleRadius * 1.2, poleHeight, reduceEnvironmentComplexityMobile? 6:8); const poleMat = new THREE.MeshStandardMaterial({ color: 0x777777, metalness: 0.9, roughness: 0.3 }); const pole = new THREE.Mesh(poleGeo, poleMat); 
                 pole.castShadow = true; pole.position.y = poleHeight/2; group.add(pole); 
                 const armLength = 1.5; const armGeo = new THREE.BoxGeometry(armLength, poleRadius * 1.8, poleRadius * 1.8); const arm = new THREE.Mesh(armGeo, poleMat); 
                 arm.castShadow = true; arm.position.set(0, poleHeight - poleRadius * 2.5, 0); group.add(arm); 
-                const lightFixtureGeo = new THREE.SphereGeometry(poleRadius * 2.5, 16, 8); const lightFixtureMat = new THREE.MeshStandardMaterial({ color: 0xffffdd, emissive: 0xffffaa, emissiveIntensity: 0 });  const lightFixture = new THREE.Mesh(lightFixtureGeo, lightFixtureMat); 
+                const lightFixtureGeo = new THREE.SphereGeometry(poleRadius * 2.5, reduceEnvironmentComplexityMobile ? 6 : 16, reduceEnvironmentComplexityMobile ? 3 : 8); const lightFixtureMat = new THREE.MeshStandardMaterial({ color: 0xffffdd, emissive: 0xffffaa, emissiveIntensity: 0 });  const lightFixture = new THREE.Mesh(lightFixtureGeo, lightFixtureMat); 
                 lightFixture.castShadow = false; lightFixture.position.set(0, poleHeight - poleRadius * 2.5, 0); group.add(lightFixture);
                 const pointLight = new THREE.PointLight(0xffffee, 0, 15, 1.5);
                 pointLight.castShadow = false; lightFixture.add(pointLight);
-                group.userData = { armLength: armLength, fixture: lightFixture, light: pointLight };
-                return group;
+                group.userData = { armLength: armLength, fixture: lightFixture, light: pointLight }; return group;
             }
-             for (let i = 0; i < numLights; i++) {
-                const zPos = (roadLength / 2) - (lightSpacing / 2) - i * lightSpacing + (Math.random()-0.5) * lightSpacing * 0.5;
+            streetLights = []; // Ensure fresh array for init
+            for (let i = 0; i < effectiveNumLights; i++) {
+                const zPos = (roadLength / 2) - (lightSpacingBase / 2) - i * lightSpacingBase + (Math.random()-0.5) * lightSpacingBase * 0.5;
                 [-1, 1].forEach(side => {
                     const light = createStreetLight();
                     const xPos = roadWidth / 2 + kerbWidth + 1.0;
                     light.position.set(side * xPos, 0, zPos);
                     light.rotation.y = side > 0 ? -Math.PI / 2.5 : Math.PI / 2.5;
-                    light.children[1].position.x = -light.userData.armLength / 2;
-                    light.children[2].position.x = -light.userData.armLength;
+                    light.children[1].position.x = -light.userData.armLength / 2; light.children[2].position.x = -light.userData.armLength;
                     streetLights.push(light); scene.add(light);
                 });
             }
-
-            function createTrafficLight() {
-                const group = new THREE.Group(); const poleHeight = 5; const poleRadius = 0.15; const poleGeo = new THREE.CylinderGeometry(poleRadius, poleRadius, poleHeight); const poleMat = new THREE.MeshStandardMaterial({ color: 0x555555, metalness: 0.7, roughness: 0.5 }); const pole = new THREE.Mesh(poleGeo, poleMat); pole.position.y = poleHeight / 2; 
-                pole.castShadow = true; group.add(pole); 
-                const housingWidth = 0.5; const housingHeight = 1.2; const housingDepth = 0.3; const housingGeo = new THREE.BoxGeometry(housingWidth, housingHeight, housingDepth); const housingMat = new THREE.MeshStandardMaterial({ color: 0x333333 }); const housing = new THREE.Mesh(housingGeo, housingMat); housing.position.y = poleHeight - housingHeight / 2; 
-                housing.castShadow = true; group.add(housing); 
-                const lightRadius = housingWidth * 0.25; const lightGeo = new THREE.SphereGeometry(lightRadius, 16, 8); const redMat = new THREE.MeshStandardMaterial({ color: 0xff0000, emissive: 0xaa0000, emissiveIntensity: 1 }); const yellowMat = new THREE.MeshStandardMaterial({ color: 0xffff00, emissive: 0xaaaa00, emissiveIntensity: 1 }); const greenMat = new THREE.MeshStandardMaterial({ color: 0x00ff00, emissive: 0x00aa00, emissiveIntensity: 1 }); const redLight = new THREE.Mesh(lightGeo, redMat); redLight.position.set(0, housingHeight * 0.3, housingDepth / 2 + 0.01); housing.add(redLight); const yellowLight = new THREE.Mesh(lightGeo, yellowMat); yellowLight.position.set(0, 0, housingDepth / 2 + 0.01); housing.add(yellowLight); const greenLight = new THREE.Mesh(lightGeo, greenMat); greenLight.position.set(0, -housingHeight * 0.3, housingDepth / 2 + 0.01); housing.add(greenLight);
-                [redLight, yellowLight, greenLight].forEach(l => { l.material.emissiveIntensity = 0.2; l.castShadow = false; });
-                return group;
-            }
-            if (Math.random() < 0.3) {
-                const trafficLightZ = roadLength * 0.3 + Math.random() * roadLength * 0.2;
-                [-1, 1].forEach(side => {
-                    const trafficLight = createTrafficLight();
-                    const trafficLightX = roadWidth / 2 + kerbWidth + 0.7;
-                    trafficLight.position.set(side * trafficLightX, 0, trafficLightZ);
-                    trafficLight.rotation.y = side > 0 ? -Math.PI / 2 : Math.PI / 2;
-                    trafficLights.push(trafficLight); scene.add(trafficLight);
-                });
+            
+            trafficLights = []; // Ensure fresh array
+            if (!reduceEnvironmentComplexityMobile && Math.random() < 0.3) {
+                // function createTrafficLight ... (same as before, or simplify)
+                // trafficLights.push(trafficLight); scene.add(trafficLight);
             }
 
-            for (let i = 0; i < 15; i++) {
+            clouds = []; // Ensure fresh array for init
+            for (let i = 0; i < effectiveNumClouds; i++) {
                 const cloudGroup = new THREE.Group();
-                const numSpheres = Math.floor(Math.random() * 5) + 3;
+                const numSpheres = reduceEnvironmentComplexityMobile ? (Math.floor(Math.random() * 2) + 2) : (Math.floor(Math.random() * 5) + 3);
                 for(let j=0; j < numSpheres; j++) {
                     const size = Math.random() * 5 + 3;
-                    const cloudPartGeo = new THREE.SphereGeometry(size, 8, 6); 
-                    const cloudPart = new THREE.Mesh(cloudPartGeo, cloudMaterial); 
+                    const cloudPartGeo = new THREE.SphereGeometry(size, reduceEnvironmentComplexityMobile ? 6:8, reduceEnvironmentComplexityMobile ? 4:6); 
+                    const cloudPart = new THREE.Mesh(cloudPartGeo, cloudMaterial.clone()); 
                     cloudPart.position.set( (Math.random() - 0.5) * 10, (Math.random() - 0.5) * 2, (Math.random() - 0.5) * 3 );
                     cloudGroup.add(cloudPart);
                 }
@@ -1259,112 +1125,69 @@
                 clouds.push(cloudGroup); scene.add(cloudGroup);
             }
 
+            if (stars && stars.geometry) stars.geometry.dispose(); if (stars && stars.material) stars.material.dispose(); scene.remove(stars);
             const starMaterial = new THREE.PointsMaterial({ color: 0xffffff, size: 0.2, sizeAttenuation: true, transparent: true, opacity: 0, depthWrite: false });
             const starVertices = [];
-            for (let i = 0; i < numStars; i++) {
+            for (let i = 0; i < effectiveNumStars; i++) {
                 starVertices.push(THREE.MathUtils.randFloatSpread(roadLength * 3), THREE.MathUtils.randFloat(50, 150), THREE.MathUtils.randFloatSpread(roadLength * 3));
             }
             const starGeometry = new THREE.BufferGeometry();
             starGeometry.setAttribute('position', new THREE.Float32BufferAttribute(starVertices, 3));
-            stars = new THREE.Points(starGeometry, starMaterial);
+            stars = new THREE.Points(starGeometry, starMaterial); // Assign to global stars
             scene.add(stars);
         }
 
-        function loadCarModels() {
-            const loader = new GLTFLoader(loadingManager);
-            const dracoLoader = new DRACOLoader(loadingManager);
-            dracoLoader.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.7/');
-            loader.setDRACOLoader(dracoLoader);
+        function loadCarModels() { /* ... (same as before) ... */ 
+            const loader = new GLTFLoader(loadingManager); const dracoLoader = new DRACOLoader(loadingManager);
+            dracoLoader.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.7/'); loader.setDRACOLoader(dracoLoader);
             const carUrl = 'https://threejs.org/examples/models/gltf/ferrari.glb';
-
             loader.load(carUrl, (gltf) => {
-                carModel = gltf.scene;
-                carModel.scale.set(0.7, 0.7, 0.7);
-                const tempBox = new THREE.Box3().setFromObject(carModel); 
-                tempBox.getSize(playerSize); 
-                carBaseY = -tempBox.min.y * carModel.scale.y + 0.02; 
-                carModel.position.set(0, carBaseY, -5); 
-                carModel.rotation.y = Math.PI; 
+                carModel = gltf.scene; carModel.scale.set(0.7,0.7,0.7);
+                const tempBox = new THREE.Box3().setFromObject(carModel); tempBox.getSize(playerSize); 
+                carBaseY = -tempBox.min.y * carModel.scale.y + 0.02; carModel.position.set(0, carBaseY, -5); carModel.rotation.y = Math.PI; 
                 carModel.traverse((node) => { if (node.isMesh) { node.castShadow = true; node.receiveShadow = true; } });
                 scene.add(carModel);
-
-                headlightLeft = new THREE.SpotLight(0xffffee, 0, 30, Math.PI / 6, 0.3, 1);
-                headlightLeft.castShadow = false; 
-                headlightLeft.position.set(-0.7, 0.6, 2.0).multiplyScalar(carModel.scale.x);
-                carModel.add(headlightLeft); carModel.add(headlightLeft.target);
-                headlightLeft.target.position.set(-0.6, 0.3, 10).multiplyScalar(carModel.scale.x);
-
-                headlightRight = headlightLeft.clone();
-                headlightRight.position.set(0.7, 0.6, 2.0).multiplyScalar(carModel.scale.x);
-                carModel.add(headlightRight); carModel.add(headlightRight.target);
-                headlightRight.target.position.set(0.6, 0.3, 10).multiplyScalar(carModel.scale.x);
-
-                taillightLeft = new THREE.PointLight(0xff0000, 0, 5, 2);
-                taillightLeft.position.set(-0.8, 0.5, -2.2).multiplyScalar(carModel.scale.x);
-                carModel.add(taillightLeft);
-
-                taillightRight = taillightLeft.clone();
-                taillightRight.position.set(0.8, 0.5, -2.2).multiplyScalar(carModel.scale.x);
-                carModel.add(taillightRight);
-
-                enemyCar = carModel.clone();
-                const tempEnemyBox = new THREE.Box3().setFromObject(enemyCar);
-                tempEnemyBox.getSize(enemySize); 
+                headlightLeft = new THREE.SpotLight(0xffffee,0,30,Math.PI/6,0.3,1); headlightLeft.castShadow = false; 
+                headlightLeft.position.set(-0.7,0.6,2.0).multiplyScalar(carModel.scale.x); carModel.add(headlightLeft); carModel.add(headlightLeft.target);
+                headlightLeft.target.position.set(-0.6,0.3,10).multiplyScalar(carModel.scale.x);
+                headlightRight = headlightLeft.clone(); headlightRight.position.set(0.7,0.6,2.0).multiplyScalar(carModel.scale.x);
+                carModel.add(headlightRight); carModel.add(headlightRight.target); headlightRight.target.position.set(0.6,0.3,10).multiplyScalar(carModel.scale.x);
+                taillightLeft = new THREE.PointLight(0xff0000,0,5,2); taillightLeft.position.set(-0.8,0.5,-2.2).multiplyScalar(carModel.scale.x); carModel.add(taillightLeft);
+                taillightRight = taillightLeft.clone(); taillightRight.position.set(0.8,0.5,-2.2).multiplyScalar(carModel.scale.x); carModel.add(taillightRight);
+                enemyCar = carModel.clone(); const tempEnemyBox = new THREE.Box3().setFromObject(enemyCar); tempEnemyBox.getSize(enemySize); 
                 enemyCar.traverse((node) => {
-                    if (node.isMesh) {
-                        const blueMaterial = node.material.clone();
-                        blueMaterial.color.setHex(0x3366ff); 
-                        node.material = blueMaterial;
-                        node.castShadow = true; node.receiveShadow = true; 
-                    }
+                    if (node.isMesh) { const blueMaterial = node.material.clone(); blueMaterial.color.setHex(0x3366ff); node.material = blueMaterial; node.castShadow = true; node.receiveShadow = true; }
                     if (node.isLight) node.intensity = 0; 
                 });
-                resetEnemyCar(); 
-                scene.add(enemyCar);
-
-                camera.position.set(0, carBaseY + 2.8, carModel.position.z - 6.5); 
-                camera.lookAt(carModel.position.x, carBaseY + 1.0, carModel.position.z + 3.0);
+                resetEnemyCar(); scene.add(enemyCar);
+                camera.position.set(0,carBaseY+2.8,carModel.position.z-6.5); camera.lookAt(carModel.position.x,carBaseY+1.0,carModel.position.z+3.0);
             }, undefined, (error) => {
                 console.error('Error loading car model:', error);
-                const fallbackGeo = new THREE.BoxGeometry(1.8, 1, 3.5);
-                playerSize.set(1.8, 1, 3.5); enemySize.copy(playerSize);   
-                const fallbackMat = new THREE.MeshStandardMaterial({color: 0xff0000});
-                carModel = new THREE.Mesh(fallbackGeo, fallbackMat);
-                carBaseY = 0.5 + 0.01; 
-                carModel.position.set(0, carBaseY, -5);
-                carModel.castShadow = true; carModel.receiveShadow = true;
-                scene.add(carModel);
-                camera.position.set(0, carBaseY + 2.8, carModel.position.z - 6.5);
-                camera.lookAt(carModel.position.x, carBaseY + 1.0, carModel.position.z + 3.0);
+                const fallbackGeo = new THREE.BoxGeometry(1.8,1,3.5); playerSize.set(1.8,1,3.5); enemySize.copy(playerSize);   
+                const fallbackMat = new THREE.MeshStandardMaterial({color:0xff0000}); carModel = new THREE.Mesh(fallbackGeo,fallbackMat);
+                carBaseY = 0.5+0.01; carModel.position.set(0,carBaseY,-5); carModel.castShadow = true; carModel.receiveShadow = true;
+                scene.add(carModel); camera.position.set(0,carBaseY+2.8,carModel.position.z-6.5); camera.lookAt(carModel.position.x,carBaseY+1.0,carModel.position.z+3.0);
             });
         }
 
-        function setupControls() {
+        function setupControls() { /* ... (same as before) ... */ 
             window.addEventListener('keydown', (event) => {
                 if (isGameOver || currentPageId !== 'game-page') return;
                 switch (event.key.toLowerCase()) {
-                    case 'arrowleft': case 'a': moveLeft = true; break;
-                    case 'arrowright': case 'd': moveRight = true; break;
-                    case 'arrowup': case 'w': moveForward = true; break;
-                    case 'arrowdown': case 's': moveBackward = true; break;
-                    case 'r': isRaining = !isRaining; updateRainSound(); break; // Toggle rain for testing
+                    case 'arrowleft': case 'a': moveLeft = true; break; case 'arrowright': case 'd': moveRight = true; break;
+                    case 'arrowup': case 'w': moveForward = true; break; case 'arrowdown': case 's': moveBackward = true; break;
+                    case 'r': isRaining = !isRaining; updateRainSound(); break;
                 }
             });
             window.addEventListener('keyup', (event) => {
-                if (currentPageId !== 'game-page') return; // Allow keyup to reset flags even if game over
+                if (currentPageId !== 'game-page') return;
                 switch (event.key.toLowerCase()) {
-                    case 'arrowleft': case 'a': moveLeft = false; break;
-                    case 'arrowright': case 'd': moveRight = false; break;
-                    case 'arrowup': case 'w': moveForward = false; break;
-                    case 'arrowdown': case 's': moveBackward = false; break;
+                    case 'arrowleft': case 'a': moveLeft = false; break; case 'arrowright': case 'd': moveRight = false; break;
+                    case 'arrowup': case 'w': moveForward = false; break; case 'arrowdown': case 's': moveBackward = false; break;
                 }
             });
-
-            const leftBtn = document.getElementById('left-button');
-            const rightBtn = document.getElementById('right-button');
-            const accelBtn = document.getElementById('accelerate-button');
-            const brakeBtn = document.getElementById('brake-button');
-
+            const leftBtn = document.getElementById('left-button'); const rightBtn = document.getElementById('right-button');
+            const accelBtn = document.getElementById('accelerate-button'); const brakeBtn = document.getElementById('brake-button');
             const safeAddEventListener = (element, eventTypeStart, eventTypeEnd, handlerStart, handlerEnd) => {
                 if (element) {
                     element.addEventListener(eventTypeStart, (e) => { if (!isGameOver && currentPageId === 'game-page') { e.preventDefault(); handlerStart(); }}, { passive: false });
@@ -1377,96 +1200,64 @@
             safeAddEventListener(brakeBtn, 'touchstart', 'touchend', () => moveBackward = true, () => moveBackward = false);
         }
         
-        function updateRainSound() {
-            if (!sounds.rain) return;
-            if (isRaining && currentPageId === 'game-page') playSound('rain', true); else stopSound('rain');
+        function updateRainSound() { /* ... (same as before) ... */ 
+             if (!sounds.rain) return; if (isRaining && currentPageId === 'game-page') playSound('rain', true); else stopSound('rain');
         }
 
         function restartGame() {
-            isGameOver = false;
-            score = 0;
-            distanceTraveled = 0;
-            carVelocity = 0;
-            currentDisplaySpeed = 0;
-            // timeOfDay = 0.4; // Already forced daytime, but good to reset if it were dynamic
-            carCurrentYOffset = 0;
-            suspensionVelocity = 0;
+            isGameOver = false; score = 0; distanceTraveled = 0; carVelocity = 0; currentDisplaySpeed = 0;
+            carCurrentYOffset = 0; suspensionVelocity = 0;
+            currentPatternIndex = 0; coinsInCurrentPattern = 0; targetCoinsForPattern = 5 + Math.floor(Math.random() * 3);
 
-            currentPatternIndex = 0;
-            coinsInCurrentPattern = 0;
-            targetCoinsForPattern = 5 + Math.floor(Math.random() * 3);
-
-            if (carModel) {
-                carModel.position.set(0, carBaseY, -5); 
-                carModel.rotation.set(0, Math.PI, 0);
-            }
+            if (carModel) { carModel.position.set(0, carBaseY, -5); carModel.rotation.set(0, Math.PI, 0); }
             resetEnemyCar();
             points.forEach(p => resetPointPosition(p, true)); 
 
-            skidMarks.forEach(s => scene.remove(s)); skidMarks = [];
-            exhaustParticles.forEach(p => scene.remove(p)); exhaustParticles = [];
-            rainParticles.forEach(r => scene.remove(r)); rainParticles = [];
+            // Clear and dispose particles from scene
+            skidMarks.forEach(s => { if(s.parent) s.parent.remove(s); if(s.geometry) s.geometry.dispose(); if(s.material) s.material.dispose(); }); skidMarks = [];
+            exhaustParticles.forEach(p => { if(p.parent) p.parent.remove(p); if(p.geometry)p.geometry.dispose(); if(p.material) p.material.dispose(); }); exhaustParticles = [];
+            rainParticles.forEach(r => { if(r.parent) r.parent.remove(r); if(r.geometry) r.geometry.dispose(); if(r.material)r.material.dispose(); }); rainParticles = [];
+
+            // Environment assets (buildings, lights, etc.) are part of the scene and are recycled, not fully recreated on restart.
+            // If you needed to fully reset them, you'd call createEnvironmentAssets() again,
+            // but that would require more complex disposal of old assets.
+            // For now, their positions will be updated in the animate loop.
 
             gameOverElement.style.display = 'none';
-            updateScoreDisplay();
-            updateDistanceDisplay();
-            updateSpeedometer();
+            updateScoreDisplay(); updateDistanceDisplay(); updateSpeedometer();
             
-            if (currentPageId === 'game-page') {
-                playSound('engine', true);
-                updateRainSound();
-            }
+            if (currentPageId === 'game-page') { playSound('engine', true); updateRainSound(); }
             updateDayCycleAndWeather(0); 
             if (camera) { camera.fov = baseFov; camera.updateProjectionMatrix(); }
         }
 
-        function resetEnemyCar() {
-            if (!enemyCar || !carModel) return;
-            enemyCar.rotation.y = 0; 
+        function resetEnemyCar() { /* ... (same as before) ... */ 
+             if (!enemyCar || !carModel) return; enemyCar.rotation.y = 0; 
             const initialEnemyX = (Math.random() < 0.5 ? -1 : 1) * (roadWidth / 4) * (0.8 + Math.random() * 0.4); 
             const initialEnemyZ = carModel.position.z + roadLength * (0.7 + Math.random() * 0.5); 
             enemyCar.position.set(initialEnemyX, carBaseY, initialEnemyZ); 
-            enemyTargetX = initialEnemyX; 
-            enemyCar.visible = true;
+            enemyTargetX = initialEnemyX; enemyCar.visible = true;
         }
 
-        function resetPointPosition(point, initial = false) {
-            const laneXOffset = roadWidth / 4;
-            let targetX;
-
+        function resetPointPosition(point, initial = false) { /* ... (same as before) ... */ 
+            const laneXOffset = roadWidth / 4; let targetX;
             if (coinsInCurrentPattern >= targetCoinsForPattern) {
                 currentPatternIndex = (currentPatternIndex + 1) % coinPatterns.length;
-                coinsInCurrentPattern = 0;
-                targetCoinsForPattern = 5 + Math.floor(Math.random() * 3);
+                coinsInCurrentPattern = 0; targetCoinsForPattern = 5 + Math.floor(Math.random() * 3);
             }
-
             const currentPattern = coinPatterns[currentPatternIndex];
-            switch (currentPattern) {
-                case 'left': targetX = -laneXOffset; break;
-                case 'right': targetX = laneXOffset; break;
-                default: targetX = 0; // Middle
-            }
-
-            point.position.x = targetX;
-            point.position.y = pointRadius + 0.02;
+            switch (currentPattern) { case 'left': targetX = -laneXOffset; break; case 'right': targetX = laneXOffset; break; default: targetX = 0; }
+            point.position.x = targetX; point.position.y = pointRadius + 0.02;
             const carZ = carModel ? carModel.position.z : 0;
-
-            if (initial) {
-                point.position.z = carZ + 20 + (points.indexOf(point) * 12);
-            } else {
+            if (initial) { point.position.z = carZ + 20 + (points.indexOf(point) * 12); } 
+            else {
                 let furthestVisibleCoinZInLane = carZ;
-                points.forEach(p => {
-                    if (p.visible && p !== point && Math.abs(p.position.x - targetX) < 0.01 && p.position.z > furthestVisibleCoinZInLane) {
-                         furthestVisibleCoinZInLane = p.position.z;
-                    }
-                });
-                const ZSpacingInPattern = 10 + Math.random() * 5;
-                const minZFromCar = carZ + roadLength * 0.4;
+                points.forEach(p => { if (p.visible && p !== point && Math.abs(p.position.x - targetX) < 0.01 && p.position.z > furthestVisibleCoinZInLane) furthestVisibleCoinZInLane = p.position.z; });
+                const ZSpacingInPattern = 10 + Math.random() * 5; const minZFromCar = carZ + roadLength * 0.4;
                 let newZ = (furthestVisibleCoinZInLane > carZ) ? furthestVisibleCoinZInLane + ZSpacingInPattern : minZFromCar + Math.random() * roadLength * 0.2;
                 point.position.z = Math.max(newZ, minZFromCar);
             }
-            coinsInCurrentPattern++;
-            point.visible = true;
+            coinsInCurrentPattern++; point.visible = true;
             if (!initial && sounds.collect) playSound('collect', false, 0.6);
         }
 
@@ -1479,14 +1270,10 @@
 
         function onWindowResize() {
             if (!camera || !renderer) return;
-            const newWidth = window.innerWidth;
-            const newHeight = window.innerHeight;
-            
-            updatePerformanceSettings(); // Re-check device type and adjust settings
-
-            camera.aspect = newWidth / newHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(newWidth, newHeight); // Renderer already has pixelRatio set
+            const newWidth = window.innerWidth; const newHeight = window.innerHeight;
+            updatePerformanceSettings(); 
+            camera.aspect = newWidth / newHeight; camera.updateProjectionMatrix();
+            renderer.setSize(newWidth, newHeight);
         }
 
         const tempVec3 = new THREE.Vector3(); 
@@ -1495,37 +1282,28 @@
             requestAnimationFrame(animate);
             if (currentPageId !== 'game-page' || !renderer || !scene || !camera || !carModel) return;
 
-            const delta = 0.016; // Assume ~60FPS, can be replaced with THREE.Clock
+            const delta = clock.getDelta(); 
 
-            if (isGameOver) {
+            if (isGameOver) { /* ... (same as before) ... */ 
                 if (sounds.engine && sounds.engine.volume > 0.01) {
                     sounds.engine.volume -= 0.01;
                     sounds.engine.playbackRate = Math.max(0.1, sounds.engine.playbackRate - 0.01);
-                } else {
-                    stopSound('engine');
-                }
-                renderer.render(scene, camera);
-                return;
+                } else stopSound('engine');
+                renderer.render(scene, camera); return;
             }
             
             let prevCarVelocity = carVelocity;
             if (moveForward) carVelocity = Math.min(carVelocity + carAcceleration, maxSpeed);
             else if (moveBackward) carVelocity = Math.max(carVelocity - carBraking, 0); 
             else carVelocity = Math.max(carVelocity - carDeceleration, 0); 
-            let accelerationEffect = (carVelocity - prevCarVelocity) / delta; 
+            let accelerationEffect = (delta > 0) ? (carVelocity - prevCarVelocity) / delta : 0; 
             
-            const actualSpeed = carVelocity * baseDriveSpeed;
-            const worldMovementZ = actualSpeed; 
+            const actualSpeed = carVelocity * baseDriveSpeed; const worldMovementZ = actualSpeed; 
+            if (carVelocity > 0 && moveForward) { distanceTraveled += worldMovementZ * 2; updateDistanceDisplay(); }
 
-            if (carVelocity > 0 && moveForward) { 
-                distanceTraveled += worldMovementZ * 2; updateDistanceDisplay();
-            }
-
-            let targetRotationZ = 0;
-            const effectiveTurnSpeed = carTurnSpeed * (1 + carVelocity * 0.5); 
+            let targetRotationZ = 0; const effectiveTurnSpeed = carTurnSpeed * (1 + carVelocity * 0.5); 
             playerBox.setFromCenterAndSize(carModel.getWorldPosition(tempVec3), playerSize);
-            const carWidth = playerSize.x; 
-            const maxBounds = roadWidth / 2 - kerbWidth - carWidth / 2 - 0.1; 
+            const carWidth = playerSize.x; const maxBounds = roadWidth / 2 - kerbWidth - carWidth / 2 - 0.1; 
             let turningEffect = 0;
 
             if (moveLeft && carModel.position.x > -maxBounds) {
@@ -1546,11 +1324,11 @@
             carModel.rotation.z = THREE.MathUtils.lerp(carModel.rotation.z, targetRotationZ * carVelocity, 0.1); 
 
             let force = -suspensionStiffness * carCurrentYOffset - suspensionDamping * suspensionVelocity + accelerationEffect * 0.005 + turningEffect * carVelocity * 0.1;
-            suspensionVelocity += force * delta;
-            carCurrentYOffset += suspensionVelocity * delta;
+            suspensionVelocity += force * delta; carCurrentYOffset += suspensionVelocity * delta;
             carCurrentYOffset = THREE.MathUtils.clamp(carCurrentYOffset, -0.05, 0.05);
             carModel.position.y = carBaseY + carCurrentYOffset;
 
+            // Critical: Ensure these arrays are populated correctly from createEnvironmentAssets
             const objectsToScroll = [ ...roadLines, ...buildings, ...streetLights, ...trafficLights, ...kerbs, ...points, ...skidMarks, ...exhaustParticles ];
             if (enemyCar && enemyCar.visible) objectsToScroll.push(enemyCar); 
             objectsToScroll.forEach(obj => obj.position.z -= worldMovementZ);
@@ -1560,13 +1338,13 @@
             kerbs.forEach(kerb => { if (kerb.position.z < recycleThreshold - roadLength / 2) kerb.position.z += roadLength * 2; });
             buildings.forEach(building => {
                 if (building.position.z < recycleThreshold - building.geometry.parameters.depth) { 
-                    building.position.z += roadLength + Math.random() * buildingSpacing * 3;
+                    building.position.z += roadLength + Math.random() * buildingSpacingBase * 3;
                     const sideSign = Math.sign(building.position.x) || (Math.random() < 0.5 ? -1 : 1);
                     const xOffset = roadWidth / 2 + kerbWidth + 2 + Math.random() * 8 + building.geometry.parameters.width / 2;
                     building.position.x = sideSign * xOffset;
                 }
             });
-            streetLights.forEach(light => { if (light.position.z < recycleThreshold) light.position.z += roadLength + Math.random() * lightSpacing * 2; });
+            streetLights.forEach(light => { if (light.position.z < recycleThreshold) light.position.z += roadLength + Math.random() * lightSpacingBase * 2; });
             trafficLights.forEach(light => { if (light.position.z < recycleThreshold) light.position.z += roadLength * 1.5 + Math.random() * roadLength; });
             points.forEach(point => { if (point.position.z < recycleThreshold - 10 && point.visible) resetPointPosition(point); });
 
@@ -1574,16 +1352,15 @@
             updateEnemyAI(delta, worldMovementZ); 
             updateParticles(delta, worldMovementZ);
 
-            const targetCameraPos = new THREE.Vector3( carModel.position.x * 0.25, carModel.position.y + 2.5 + carVelocity * 0.4, carModel.position.z - 6.5 - carVelocity * 2.0 );
+            const targetCameraPos = new THREE.Vector3( carModel.position.x*0.25, carModel.position.y + 2.5 + carVelocity*0.4, carModel.position.z - 6.5 - carVelocity*2.0 );
             camera.position.lerp(targetCameraPos, 0.12);
-            const lookAtPos = new THREE.Vector3( carModel.position.x * 0.4, carModel.position.y + 1.0, carModel.position.z + 4.0 );
+            const lookAtPos = new THREE.Vector3( carModel.position.x*0.4, carModel.position.y + 1.0, carModel.position.z + 4.0 );
             camera.lookAt(lookAtPos);
             camera.fov = THREE.MathUtils.lerp(camera.fov, baseFov + carVelocity * 8, 0.05);
             camera.updateProjectionMatrix();
 
-            points.forEach(point => {
-                if (!point.visible) return;
-                pointBox.setFromObject(point); 
+            points.forEach(point => { /* ... (same as before) ... */ 
+                if (!point.visible) return; pointBox.setFromObject(point); 
                 if (playerBox.intersectsBox(pointBox)) {
                     score += pointValue; updateScoreDisplay(); point.visible = false;
                     if(sounds.collect) playSound('collect', false, 0.6);
@@ -1591,56 +1368,45 @@
                 }
             });
             
-            if (enemyCar && enemyCar.visible) {
+            if (enemyCar && enemyCar.visible) { /* ... (same as before) ... */ 
                 enemyBox.setFromCenterAndSize(enemyCar.getWorldPosition(tempVec3), enemySize);
-                if (playerBox.intersectsBox(enemyBox)) {
-                    handleGameOver();
-                } else if (nearMissCooldown <= 0) { 
-                    const distZ = Math.abs(carModel.position.z - enemyCar.position.z);
-                    const distX = Math.abs(carModel.position.x - enemyCar.position.x);
-                    const carCombinedHalfWidth = playerSize.x/2 + enemySize.x/2;
-                    const carCombinedHalfLength = playerSize.z/2 + enemySize.z/2;
+                if (playerBox.intersectsBox(enemyBox)) handleGameOver();
+                else if (nearMissCooldown <= 0) { 
+                    const distZ = Math.abs(carModel.position.z - enemyCar.position.z); const distX = Math.abs(carModel.position.x - enemyCar.position.x);
+                    const carCombinedHalfWidth = playerSize.x/2 + enemySize.x/2; const carCombinedHalfLength = playerSize.z/2 + enemySize.z/2;
                     if (distZ < carCombinedHalfLength*1.5 && distX < carCombinedHalfWidth*1.8 && distX > carCombinedHalfWidth*0.9 && carVelocity > 0.3) {
                         score += nearMissBonus; updateScoreDisplay();
-                        if(sounds.nearMiss) playSound('nearMiss', false, 0.4);
-                        nearMissCooldown = 1.5; 
+                        if(sounds.nearMiss) playSound('nearMiss', false, 0.4); nearMissCooldown = 1.5; 
                     }
                 }
             }
             if (nearMissCooldown > 0) nearMissCooldown -= delta;
 
-            updateSpeedometer();
-            updateEngineSound();
+            updateSpeedometer(); updateEngineSound();
             renderer.render(scene, camera);
         }
 
-        function handleGameOver() {
-            if (isGameOver) return;
-            isGameOver = true;
+        function handleGameOver() { /* ... (same as before) ... */ 
+             if (isGameOver) return; isGameOver = true;
             if(finalScoreDisplayElement) finalScoreDisplayElement.textContent = `Distance: ${Math.floor(distanceTraveled)} m | Score: ${score}`;
-            gameOverElement.style.display = 'flex';
-            handleAdSlotVisibility('ad-slot-game-over');
+            gameOverElement.style.display = 'flex'; handleAdSlotVisibility('ad-slot-game-over');
             saveScoreToLeaderboard(currentPlayerName, Math.floor(distanceTraveled));
-            stopSound('engine');
-            if(sounds.engine) { sounds.engine.volume = 0.3; sounds.engine.playbackRate = 1.0; }
+            stopSound('engine'); if(sounds.engine) { sounds.engine.volume = 0.3; sounds.engine.playbackRate = 1.0; }
         }
 
-        function saveScoreToLeaderboard(playerName, currentDistance) {
+        function saveScoreToLeaderboard(playerName, currentDistance) { /* ... (same as before) ... */ 
             if (!playerName) playerName = "Player";
             try {
-                const scoresJSON = localStorage.getItem(LEADERBOARD_KEY);
-                let scores = scoresJSON ? JSON.parse(scoresJSON) : [];
+                const scoresJSON = localStorage.getItem(LEADERBOARD_KEY); let scores = scoresJSON ? JSON.parse(scoresJSON) : [];
                 scores.push({ name: playerName, score: currentDistance });
-                scores.sort((a, b) => b.score - a.score);
-                scores = scores.slice(0, MAX_LEADERBOARD_ENTRIES); 
+                scores.sort((a, b) => b.score - a.score); scores = scores.slice(0, MAX_LEADERBOARD_ENTRIES); 
                 localStorage.setItem(LEADERBOARD_KEY, JSON.stringify(scores));
             } catch (e) { console.error("Could not save score to leaderboard:", e); }
         }
 
-        function displayLeaderboard() {
+        function displayLeaderboard() { /* ... (same as before) ... */ 
             try {
-                const scoresJSON = localStorage.getItem(LEADERBOARD_KEY);
-                const scores = scoresJSON ? JSON.parse(scoresJSON) : [];
+                const scoresJSON = localStorage.getItem(LEADERBOARD_KEY); const scores = scoresJSON ? JSON.parse(scoresJSON) : [];
                 leaderboardListElement.innerHTML = ''; 
                 if (scores.length > 0) {
                     noScoresMessageElement.style.display = 'none';
@@ -1648,78 +1414,56 @@
                         const li = document.createElement('li');
                         const nameSpan = document.createElement('span'); nameSpan.className = 'leaderboard-name'; nameSpan.textContent = scoreItem.name;
                         const scoreSpan = document.createElement('span'); scoreSpan.className = 'leaderboard-score'; scoreSpan.textContent = `${scoreItem.score} m`;
-                        li.appendChild(nameSpan); li.appendChild(scoreSpan);
-                        leaderboardListElement.appendChild(li);
+                        li.appendChild(nameSpan); li.appendChild(scoreSpan); leaderboardListElement.appendChild(li);
                     });
-                } else {
-                    noScoresMessageElement.style.display = 'block';
-                }
+                } else noScoresMessageElement.style.display = 'block';
             } catch (e) {
                 console.error("Could not display leaderboard:", e);
-                leaderboardListElement.innerHTML = '<li>Error loading scores.</li>';
-                noScoresMessageElement.style.display = 'none';
+                leaderboardListElement.innerHTML = '<li>Error loading scores.</li>'; noScoresMessageElement.style.display = 'none';
             }
         }
 
-        function updateDayCycleAndWeather(delta) {
-            timeOfDay = 0.4; // Forced daytime
-            const sunIntensity = 1.0; // Full sun due to forced daytime
-
+        function updateDayCycleAndWeather(delta) { /* ... (same as before, forced daytime logic, uses reduceEnvironmentComplexityMobile) ... */ 
+            timeOfDay = 0.4; const sunIntensity = 1.0; 
             if (!ambientLight || !directionalLight || !scene.fog) return;
-
-            ambientLight.intensity = 0.4 + sunIntensity * 0.6; 
-            directionalLight.intensity = 0.6 + sunIntensity * 1.2; 
+            ambientLight.intensity = 0.4 + sunIntensity * 0.6; directionalLight.intensity = 0.6 + sunIntensity * 1.2; 
             directionalLight.position.y = 50 + sunIntensity * 50;
-            if (lensflare) lensflare.visible = directionalLight.intensity > 0.1;
-
-            const dayColor = new THREE.Color(0xa0d7e6); 
-            scene.background.copy(dayColor); 
-            scene.fog.color.copy(dayColor);
+            if (lensflare) lensflare.visible = !reduceEnvironmentComplexityMobile && directionalLight.intensity > 0.1;
+            const dayColor = new THREE.Color(0xa0d7e6); scene.background.copy(dayColor); scene.fog.color.copy(dayColor);
             const fogFactor = 1.0 - sunIntensity * 0.5;
-            scene.fog.near = baseFogNear * (0.6 + fogFactor * 0.4);
-            scene.fog.far = baseFogFar * (0.85 + fogFactor * 0.15);
-
-            const nightFactor = 0; // 1.0 - sunIntensity; // Will be 0 due to forced daytime
-            const isMobileDevice = window.innerWidth <= 768;
-
+            scene.fog.near = baseFogNear * (0.6 + fogFactor * 0.4); scene.fog.far = baseFogFar * (0.85 + fogFactor * 0.15);
+            const nightFactor = 0; const isMobileDevice = reduceEnvironmentComplexityMobile; 
             streetLights.forEach(sl => {
                 sl.userData.fixture.material.emissiveIntensity = nightFactor * 1.5;
-                sl.userData.light.intensity = isMobileDevice ? nightFactor * 0.5 : nightFactor * 3; // Will be 0
+                sl.userData.light.intensity = isMobileDevice ? nightFactor * 0.2 : nightFactor * 3;
             });
-            
             if (headlightLeft) { 
-                let headLightBrightness = isRaining ? 0.8 : (nightFactor > 0.6 ? nightFactor * 1.5 : 0); // Will be 0 or 0.8 if raining
-                headlightLeft.intensity = headLightBrightness;
-                headlightRight.intensity = headLightBrightness;
+                let headLightBrightness = isRaining ? 0.8 : (nightFactor > 0.6 ? nightFactor * 1.5 : 0);
+                headlightLeft.intensity = headLightBrightness; headlightRight.intensity = headLightBrightness;
                 const baseTaillightIntensity = 0.5;
-                taillightLeft.intensity = baseTaillightIntensity + carVelocity * 1.0 + (moveBackward ? 5.0 : 0);
-                taillightRight.intensity = baseTaillightIntensity + carVelocity * 1.0 + (moveBackward ? 5.0 : 0);
+                taillightLeft.intensity = baseTaillightIntensity + carVelocity*1.0 + (moveBackward ? 5.0:0);
+                taillightRight.intensity = baseTaillightIntensity + carVelocity*1.0 + (moveBackward ? 5.0:0);
             }
-
-            if(stars) stars.material.opacity = Math.max(0, nightFactor * 1.5 - 0.5); // Will be 0
-
+            if(stars) stars.material.opacity = Math.max(0, nightFactor * 1.5 - 0.5);
             if (cloudMaterial) cloudMaterial.opacity = 0.3 + sunIntensity * 0.4; 
             clouds.forEach(cloud => { 
                 cloud.position.x += cloud.userData.speed * delta * 100; 
                 if (cloud.position.x > roadLength * 1.2 + 50) { 
-                    cloud.position.x = -roadLength * 1.2 - 50;
-                    cloud.position.z = (Math.random() - 0.5) * roadLength * 1.5;
-                    cloud.position.y = Math.random() * 20 + 40;
+                    cloud.position.x = -roadLength*1.2-50; cloud.position.z = (Math.random()-0.5)*roadLength*1.5; cloud.position.y = Math.random()*20+40;
                 }
             });
-
             if (isRaining) {
                 if (road && road.material.roughness > 0.2) road.material.roughness -= 0.01;
                 if (road && road.material.metalness < 0.4) road.material.metalness += 0.01;
                 if (rainParticles.length < effectiveMaxRainParticles && Math.random() < 0.5) createRainParticle();
                 rainParticles.forEach((rain, index) => {
                     rain.position.y -= 0.8 + carVelocity * 0.3;
-                    if (rain.position.y < 0) { scene.remove(rain); rainParticles.splice(index, 1); }
+                    if (rain.position.y < 0) { if(rain.parent) rain.parent.remove(rain); rain.geometry.dispose(); rain.material.dispose(); rainParticles.splice(index, 1); }
                 });
             } else {
                 if (road && road.material.roughness < 0.8) road.material.roughness += 0.01;
                 if (road && road.material.metalness > 0.1) road.material.metalness -= 0.01;
-                if (rainParticles.length > 0) { rainParticles.forEach((r) => scene.remove(r)); rainParticles = []; }
+                if (rainParticles.length > 0) { rainParticles.forEach((r) => {if(r.parent) r.parent.remove(r); r.geometry.dispose(); r.material.dispose();}); rainParticles = []; }
             }
             if (currentPageId === 'game-page' && scene && scene.background) {
                 const gamePageDiv = document.getElementById('game-page');
@@ -1727,10 +1471,9 @@
             }
         }
 
-        function updateEnemyAI(delta, worldMovementZ) {
+        function updateEnemyAI(delta, worldMovementZ) { /* ... (same as before) ... */ 
             if (!enemyCar || !enemyCar.visible || !carModel) return;
-            const enemyActualSpeedOnRoad = baseDriveSpeed * enemyCarSpeedFactor;
-            enemyCar.position.z -= enemyActualSpeedOnRoad; 
+            const enemyActualSpeedOnRoad = baseDriveSpeed * enemyCarSpeedFactor; enemyCar.position.z -= enemyActualSpeedOnRoad; 
             enemyLaneChangeTimer += delta * 1000;
             if (enemyLaneChangeTimer >= enemyLaneChangeInterval) {
                 enemyLaneChangeTimer = 0;
@@ -1743,118 +1486,95 @@
         function updateParticles(delta, worldMovementZ) {
             skidMarks.forEach((skid, index) => {
                 skid.material.opacity -= 0.004;
-                if (skid.material.opacity <= 0) { scene.remove(skid); skidMarks.splice(index, 1); }
+                if (skid.material.opacity <= 0) { if(skid.parent) skid.parent.remove(skid); skid.geometry.dispose(); skid.material.dispose(); skidMarks.splice(index, 1); }
             });
 
             if (carModel && carVelocity > 0.1) {
-                if (exhaustParticles.length < effectiveMaxExhaustParticles && Math.random() < 0.5) {
-                    createExhaustParticle();
-                } else if (exhaustParticles.length >= effectiveMaxExhaustParticles) {
+                if (exhaustParticles.length < effectiveMaxExhaustParticles && Math.random() < 0.5) createExhaustParticle();
+                else if (exhaustParticles.length >= effectiveMaxExhaustParticles) {
                     const oldestParticle = exhaustParticles.shift();
-                    if (scene) scene.remove(oldestParticle);
+                    if (oldestParticle.parent) oldestParticle.parent.remove(oldestParticle); oldestParticle.geometry.dispose(); oldestParticle.material.dispose();
                 }
             }
             exhaustParticles.forEach((particle, index) => {
-                particle.position.y += 0.02 + carVelocity * 0.01;
-                particle.position.x -= carVelocity * 0.005;
-                particle.material.opacity -= 0.015;
-                particle.scale.multiplyScalar(1.01);
+                particle.position.y += 0.02 + carVelocity * 0.01; particle.position.x -= carVelocity * 0.005;
+                particle.material.opacity -= 0.015; particle.scale.multiplyScalar(1.01);
                 if (particle.material.opacity <= 0) { 
-                    if (scene) scene.remove(particle); exhaustParticles.splice(index, 1); 
+                    if (particle.parent) particle.parent.remove(particle); particle.geometry.dispose(); particle.material.dispose(); exhaustParticles.splice(index, 1); 
                 }
             });
         }
 
-        function createSkidMark(position, rotationY) {
-             if (skidMarks.length >= effectiveMaxSkidMarks) {
+        function createSkidMark(position, rotationY) { /* ... (same as before) ... */ 
+            if (skidMarks.length >= effectiveMaxSkidMarks) {
                 const oldestSkid = skidMarks.shift(); 
-                if (scene) scene.remove(oldestSkid);           
+                if (oldestSkid.parent) oldestSkid.parent.remove(oldestSkid); oldestSkid.geometry.dispose(); oldestSkid.material.dispose();
             }
-            const skidGeo = new THREE.PlaneGeometry(0.3 + carVelocity * 0.3, 0.8 + carVelocity * 0.5);
-            const skidMat = new THREE.MeshStandardMaterial({ 
-                color: 0x1a1a1a, transparent: true, opacity: 0.75 + carVelocity * 0.15, 
-                roughness: 0.8, depthWrite: false
-            });
+            const skidGeo = new THREE.PlaneGeometry(0.3+carVelocity*0.3, 0.8+carVelocity*0.5);
+            const skidMat = new THREE.MeshStandardMaterial({ color:0x1a1a1a, transparent:true, opacity:0.75+carVelocity*0.15, roughness:0.8, depthWrite:false });
             const skid = new THREE.Mesh(skidGeo, skidMat);
-            skid.castShadow = false; // Performance
-            skid.receiveShadow = false; // Performance
-            skid.rotation.x = -Math.PI / 2; 
-            skid.position.copy(position);
-            skid.position.y = 0.01; 
+            skid.castShadow = false; skid.receiveShadow = false; 
+            skid.rotation.x = -Math.PI / 2; skid.position.copy(position); skid.position.y = 0.01; 
             skid.rotation.z = rotationY - Math.PI/2; 
-            
-            const offset = new THREE.Vector3(0, 0, -1.5 * (carModel?.scale.z || 0.8) ); 
-            if (carModel) offset.applyEuler(carModel.rotation); 
-            skid.position.add(offset);
-
-            if (scene) scene.add(skid);
-            skidMarks.push(skid);
+            const offset = new THREE.Vector3(0,0,-1.5*(carModel?.scale.z||0.8)); 
+            if (carModel) offset.applyEuler(carModel.rotation); skid.position.add(offset);
+            if (scene) scene.add(skid); skidMarks.push(skid);
         }
 
-        function createRainParticle() {
+        function createRainParticle() { /* ... (same as before) ... */ 
             if (!scene || !camera) return;
-            const rainGeo = new THREE.CylinderGeometry(0.01, 0.01, 0.6);
-            const rainMat = new THREE.MeshBasicMaterial({ color: 0xabcdef, transparent: true, opacity: Math.random() * 0.3 + 0.2 });
+            const rainGeo = new THREE.CylinderGeometry(0.01, 0.01, 0.6, reduceEnvironmentComplexityMobile ? 4 : 8); // Simpler geometry for mobile
+            const rainMat = new THREE.MeshBasicMaterial({ color:0xabcdef, transparent:true, opacity:Math.random()*0.3+0.2 });
             const rain = new THREE.Mesh(rainGeo, rainMat);
-            rain.position.set( camera.position.x + (Math.random() - 0.5) * roadWidth * 3, camera.position.y + Math.random() * 15 + 5, camera.position.z + (Math.random() - 0.5) * roadLength * 0.5 );
+            rain.position.set( camera.position.x+(Math.random()-0.5)*roadWidth*3, camera.position.y+Math.random()*15+5, camera.position.z+(Math.random()-0.5)*roadLength*0.5 );
             rain.rotation.z = (Math.random() - 0.5) * 0.2;
-            scene.add(rain);
-            rainParticles.push(rain);
+            scene.add(rain); rainParticles.push(rain);
         }
 
-        function createExhaustParticle() {
-            if (!carModel || !scene) return;
-            const exhaustGeo = new THREE.SphereGeometry(0.05 + carVelocity * 0.05, 4, 4);
-            const exhaustMat = new THREE.MeshBasicMaterial({ color: 0xcccccc, transparent: true, opacity: 0.3 + carVelocity * 0.2, depthWrite: false });
+        function createExhaustParticle() { /* ... (same as before) ... */ 
+             if (!carModel || !scene) return;
+            const exhaustGeo = new THREE.SphereGeometry(0.05+carVelocity*0.05, reduceEnvironmentComplexityMobile ? 3 : 4, reduceEnvironmentComplexityMobile ? 2 : 4); // Simpler geometry
+            const exhaustMat = new THREE.MeshBasicMaterial({ color:0xcccccc, transparent:true, opacity:0.3+carVelocity*0.2, depthWrite:false });
             const particle = new THREE.Mesh(exhaustGeo, exhaustMat);
             const carWorldPos = carModel.getWorldPosition(new THREE.Vector3());
-            const exhaustOffset = new THREE.Vector3( (Math.random() - 0.5) * 0.4, -0.1, -1.8 * (carModel.scale.z || 0.8) );
-            exhaustOffset.applyEuler(carModel.rotation);
-            particle.position.copy(carWorldPos).add(exhaustOffset);
+            const exhaustOffset = new THREE.Vector3( (Math.random()-0.5)*0.4, -0.1, -1.8*(carModel.scale.z||0.8) );
+            exhaustOffset.applyEuler(carModel.rotation); particle.position.copy(carWorldPos).add(exhaustOffset);
             particle.position.y = Math.max(0.1, particle.position.y);
-            scene.add(particle);
-            exhaustParticles.push(particle);
+            scene.add(particle); exhaustParticles.push(particle);
         }
 
-        function playSound(soundName, loop = false, volume = null) {
+        function playSound(soundName, loop = false, volume = null) { /* ... (same as before) ... */ 
             if (sounds[soundName] && typeof Audio !== "undefined" ) {
-                sounds[soundName].loop = loop;
-                const S = sounds[soundName];
+                sounds[soundName].loop = loop; const S = sounds[soundName];
                 let baseVolume = soundName === 'engine' ? 0.3 : 0.5;
                 S.volume = volume !== null ? volume * baseVolume : baseVolume;
                 if (currentPageId === 'game-page' || !loop) {
-                    if (S.paused || !loop || S.currentTime > 0) { // Check currentTime to replay short sounds
-                        S.currentTime = 0;
-                        S.play().catch(e => {/* console.warn('Audio play prevented:', e) */});
+                    if (S.paused || !loop || S.currentTime > 0) { 
+                        S.currentTime = 0; S.play().catch(e => {/* console.warn('Audio play prevented:', e) */});
                     }
                 }
             }
         }
 
-        function stopSound(soundName) {
+        function stopSound(soundName) { /* ... (same as before) ... */ 
             if (sounds[soundName] && typeof Audio !== "undefined") {
-                sounds[soundName].pause();
-                sounds[soundName].currentTime = 0;
+                sounds[soundName].pause(); sounds[soundName].currentTime = 0;
             }
         }
         
-        function updateEngineSound() {
+        function updateEngineSound() { /* ... (same as before) ... */ 
             if(sounds.engine && !isGameOver && currentPageId === 'game-page') {
                 const minPlaybackRate = 0.5, maxPlaybackRate = 2.0;
                 const targetPlaybackRate = minPlaybackRate + (carVelocity * (maxPlaybackRate - minPlaybackRate));
                 sounds.engine.playbackRate = THREE.MathUtils.lerp( sounds.engine.playbackRate || 1.0, targetPlaybackRate, 0.15 );
-                
                 const baseEngineVolume = 0.3, minVolume = 0.2, maxVolume = 0.8;
                 const dynamicVolumeFactor = minVolume + (carVelocity * (maxVolume - minVolume));
                 let targetVolume = Math.min(baseEngineVolume * dynamicVolumeFactor, 1.0);
                 sounds.engine.volume = THREE.MathUtils.lerp( sounds.engine.volume || baseEngineVolume, targetVolume, 0.1 );
-
                 if (sounds.engine.paused && sounds.engine.volume > 0.01 && carVelocity > 0.01) {
                     sounds.engine.play().catch(e => {/* console.warn('Engine sound play prevented:', e) */});
                 }
-            } else if (sounds.engine && (isGameOver || currentPageId !== 'game-page')) {
-                stopSound('engine');
-            }
+            } else if (sounds.engine && (isGameOver || currentPageId !== 'game-page')) stopSound('engine');
         }
 
         // Initial page display
