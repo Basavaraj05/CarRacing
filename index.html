@@ -741,7 +741,7 @@
             if (pageId === 'game-page') {
                 document.body.style.overflow = 'hidden';
                 pageContainer.style.overflowY = 'hidden';
-                if (gamePage) gamePage.style.touchAction = 'none'; // Already present, good for page level
+                if (gamePage) gamePage.style.touchAction = 'none'; 
                 if (stats) stats.dom.style.display = 'block';
             } else {
                 document.body.style.overflow = 'auto';
@@ -824,15 +824,15 @@
         // --- Game Variables ---
         let scene, camera, renderer, carModel, enemyCar, clock;
         let ambientLight, directionalLight, lensflare;
-        let road, kerbs = []; // roadLines removed, handled by roadLineInstanceMesh
+        let road, kerbs = [];
         let buildings = [], streetLights = [], trafficLights = [];
         let clouds = [];
         let cloudMaterial;
         let stars = null;
-        const numStarsBase = 300;
+        const numStarsBase = 300; // Base for desktop
 
         const roadWidth = 10;
-        const roadLength = 200; // This defines one "segment" of road
+        const roadLength = 200; 
         const buildingSpacingBase = 15;
         const lightSpacingBase = 30;
 
@@ -842,29 +842,32 @@
         const kerbHeight = 0.2; const kerbWidth = 0.3; const enemyCarSpeedFactor = 0.65;
 
         let carVelocity = 0;
-        let carAcceleration = 0.005; // Reduced from 0.0045
+        let carAcceleration = 0.005; 
         let carDeceleration = 0.002;
-        let maxSpeed = 1.0;          // Reduced from 1.8
+        let maxSpeed = 1.0;          
         let currentDisplaySpeed = 0;
         const baseDriveSpeed = 0.8;
 
         // Instanced Mesh variables
         let roadLineInstanceMesh;
-        const MAX_ROAD_LINES = Math.floor(roadLength / (3 + 5)) + 10; // lineLength + lineGap, plus buffer
+        const MAX_ROAD_LINES = Math.floor(roadLength / (3 + 5)) + 10; 
 
         let rainInstanceMesh, rainInstanceData = [];
-        const MAX_RAIN_PARTICLES_INSTANCED = 150; // Tunable
+        const ABSOLUTE_MAX_RAIN_PARTICLES = 150;
+        let effectiveMaxRainParticles;
 
         let exhaustInstanceMesh, exhaustInstanceData = [];
-        const MAX_EXHAUST_PARTICLES_INSTANCED = 25; // Tunable
+        const ABSOLUTE_MAX_EXHAUST_PARTICLES = 25;
+        let effectiveMaxExhaustParticles;
 
         let skidInstanceMesh, skidInstanceData = [];
-        const MAX_SKID_MARKS_INSTANCED = 40; // Tunable
+        const ABSOLUTE_MAX_SKID_MARKS = 40;
+        let effectiveMaxSkidMarks;
         let nextSkidMarkIndex = 0;
-        let lastSkidTime = 0; const skidInterval = 120; // Slightly increased interval
+        let lastSkidTime = 0; const skidInterval = 120; 
 
         let isRaining = false;
-        let timeOfDay = 0.5;
+        let timeOfDay = 0.5; // Forced daytime for performance
         let baseFogNear = roadLength * 0.4; let baseFogFar = roadLength * 0.9;
 
         const sounds = {};
@@ -978,19 +981,18 @@
             reduceEnvironmentComplexityMobile = isMobileDevice;
 
             if (renderer) {
-                // Increase pixel ratio for better graphics
-                const pixelRatio = Math.min(window.devicePixelRatio, isMobileDevice ? 1.5 : 2.0);
+                // OPTIMIZATION: Adjust pixel ratio for mobile
+                const pixelRatio = Math.min(window.devicePixelRatio, isMobileDevice ? 1.2 : 2.0); // Was 1.5 for mobile
                 renderer.setPixelRatio(pixelRatio);
                 
-                // Enable antialiasing for better graphics
                 renderer.setSize(window.innerWidth, window.innerHeight);
-                renderer.shadowMap.enabled = true;
-                renderer.shadowMap.type = THREE.PCFSoftShadowMap; // Better shadow quality
+                // Shadows enabled/type set in initThreeJSGame and here for consistency
+                renderer.shadowMap.enabled = true; 
+                renderer.shadowMap.type = THREE.PCFSoftShadowMap;
             }
 
             if (directionalLight && directionalLight.shadow) {
-                // Increase shadow map size for better quality
-                const shadowMapSize = isMobileDevice ? 512 : 1024;
+                const shadowMapSize = isMobileDevice ? 512 : 1024; // 512 is a good compromise for mobile
                 if (directionalLight.shadow.mapSize.width !== shadowMapSize) {
                     directionalLight.shadow.mapSize.width = shadowMapSize;
                     directionalLight.shadow.mapSize.height = shadowMapSize;
@@ -999,39 +1001,62 @@
                         directionalLight.shadow.map = null;
                     }
                 }
+                // OPTIMIZATION: Tighter shadow frustum and shorter shadow distance for mobile
+                directionalLight.shadow.camera.far = reduceEnvironmentComplexityMobile ? 120 : 180;
+                const frustumSizeFactor = reduceEnvironmentComplexityMobile ? 0.18 : 0.25;
+                directionalLight.shadow.camera.left = -roadLength * frustumSizeFactor;
+                directionalLight.shadow.camera.right = roadLength * frustumSizeFactor;
+                directionalLight.shadow.camera.top = roadLength * frustumSizeFactor;
+                directionalLight.shadow.camera.bottom = -roadLength * frustumSizeFactor;
+                directionalLight.shadow.camera.updateProjectionMatrix();
             }
 
-            // Adjust environment complexity based on device
+            // OPTIMIZATION: Adjust environment complexity more aggressively for mobile
             if (reduceEnvironmentComplexityMobile) {
-                effectiveNumBuildings = Math.floor(roadLength / (buildingSpacingBase * 1.5));
-                effectiveNumLights = Math.floor(roadLength / (lightSpacingBase * 1.5));
-                effectiveNumClouds = 8;
-                effectiveNumStars = 100;
+                effectiveNumBuildings = Math.floor(roadLength / (buildingSpacingBase * 2.5)); // Was 1.5 or 2.0
+                effectiveNumLights = Math.floor(roadLength / (lightSpacingBase * 2.5));    // Was 1.5 or 2.0
+                effectiveNumClouds = 6; // Was 8
+                effectiveNumStars = 80; // Was 100
             } else {
                 effectiveNumBuildings = Math.floor(roadLength / buildingSpacingBase);
                 effectiveNumLights = Math.floor(roadLength / lightSpacingBase);
                 effectiveNumClouds = 20;
                 effectiveNumStars = numStarsBase;
             }
+
+            // OPTIMIZATION: Effective particle counts
+            effectiveMaxRainParticles = reduceEnvironmentComplexityMobile ? 60 : ABSOLUTE_MAX_RAIN_PARTICLES;
+            effectiveMaxExhaustParticles = reduceEnvironmentComplexityMobile ? 15 : ABSOLUTE_MAX_EXHAUST_PARTICLES;
+            effectiveMaxSkidMarks = reduceEnvironmentComplexityMobile ? 25 : ABSOLUTE_MAX_SKID_MARKS;
+            
+            // If createEnvironmentAssets is called after this, it will use new effectiveNums.
+            // If particle systems are created after this, they will use new effectiveMax...
+            // However, existing InstancedMeshes for particles are created with ABSOLUTE_MAX counts.
+            // The update loops for particles will respect 'effectiveMax...' for active particles.
         }
 
         function createWindowTexture(baseColorHex, buildingWidth, buildingHeight) {
             const canvas = document.createElement('canvas');
-            const S = reduceEnvironmentComplexityMobile ? 48 : 128;
-            canvas.width = S; canvas.height = S * 1.5;
+            // OPTIMIZATION: Drastically reduce canvas texture size for mobile buildings
+            const S = reduceEnvironmentComplexityMobile ? 32 : 128; // Was 48:128
+            canvas.width = S; canvas.height = S * 1.5; // Maintain aspect ratio
             const ctx = canvas.getContext('2d');
             const baseColorStr = new THREE.Color(baseColorHex).getStyle();
             ctx.fillStyle = baseColorStr; ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            const N_col = reduceEnvironmentComplexityMobile ? 1 : 3;
-            const N_row = reduceEnvironmentComplexityMobile ? 2 : 5;
+            const N_col = reduceEnvironmentComplexityMobile ? 1 : 3; // Keep as is, 1 col on mobile is fine
+            const N_row = reduceEnvironmentComplexityMobile ? 2 : 5; // Keep as is
             const cellWidth = canvas.width / N_col; const cellHeight = canvas.height / N_row;
             const windowPadWidth = cellWidth * 0.15; const windowPadHeight = cellHeight * 0.12;
             const windowWidth = cellWidth - 2 * windowPadWidth; const windowHeight = cellHeight - 2 * windowPadHeight;
             for (let r = 0; r < N_row; r++) {
                 for (let c = 0; c < N_col; c++) {
-                    if (Math.random() > 0.1) {
-                        let currentWindowColor = '#354048';
+                    if (Math.random() > 0.1) { // 10% chance of no window in a cell
+                        // Simulate lit/unlit windows (subtle, as it's forced daytime)
+                        let currentWindowColor = (Math.random() > 0.3) ? '#252a30' : '#4a5058'; // Darker, less yellow
+                        if (timeOfDay < 0.2 || timeOfDay > 0.8) { // If it were night
+                           currentWindowColor = (Math.random() > 0.4) ? '#FFFF99' : '#354048'; // Some lit
+                        }
                         ctx.fillStyle = currentWindowColor;
                         ctx.fillRect(c * cellWidth + windowPadWidth, r * cellHeight + windowPadHeight, windowWidth, windowHeight);
                     }
@@ -1040,7 +1065,9 @@
             const texture = new THREE.CanvasTexture(canvas);
             texture.wrapS = THREE.RepeatWrapping; texture.wrapT = THREE.RepeatWrapping;
             if (renderer) texture.anisotropy = renderer.capabilities.getMaxAnisotropy() / (reduceEnvironmentComplexityMobile ? 2 : 1);
-            const metersPerTileWidth = 4; const metersPerTileHeight = 5;
+            // OPTIMIZATION: Stretch texture more on mobile to use smaller source texture
+            const metersPerTileWidth = reduceEnvironmentComplexityMobile ? 5 : 4; 
+            const metersPerTileHeight = reduceEnvironmentComplexityMobile ? 6 : 5;
             texture.repeat.set(buildingWidth / metersPerTileWidth, buildingHeight / metersPerTileHeight);
             texture.needsUpdate = true;
             return texture;
@@ -1053,33 +1080,31 @@
 
             clock = new THREE.Clock();
             scene = new THREE.Scene();
-            scene.background = new THREE.Color(0xa0d7e6);
-            scene.fog = new THREE.Fog(0xa0d7e6, baseFogNear, baseFogFar);
+            scene.background = new THREE.Color(0xa0d7e6); // Initial color
+            scene.fog = new THREE.Fog(0xa0d7e6, baseFogNear, baseFogFar); // Initial fog
 
             camera = new THREE.PerspectiveCamera(baseFov, window.innerWidth / window.innerHeight, 0.1, 1000);
 
-            // Stats.js
             stats = new Stats();
             stats.dom.style.position = 'absolute';
-            stats.dom.style.top = '70px'; // Adjust so it doesn't overlap nav
+            stats.dom.style.top = '70px';
             stats.dom.style.left = '10px';
-            stats.dom.style.display = 'none'; // Initially hidden, shown with game page
+            stats.dom.style.display = 'none';
             document.body.appendChild(stats.dom);
 
-
-            const isMobileForRenderer = window.innerWidth <= 768;
             try {
                 renderer = new THREE.WebGLRenderer({ 
-                    antialias: true, 
+                    antialias: true, // Kept true as per request
                     alpha: true,
                     powerPreference: "high-performance"
                 });
-                updatePerformanceSettings();
-                renderer.setSize(window.innerWidth, window.innerHeight);
-                renderer.shadowMap.enabled = true;
-                renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+                // Call updatePerformanceSettings early to set pixelRatio, shadow map size etc.
+                updatePerformanceSettings(); // Sets pixelRatio, shadow map size for renderer and light
+
+                // renderer.setSize is already called within updatePerformanceSettings
+                // renderer.shadowMap.enabled and type also set within updatePerformanceSettings via renderer check
                 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-                renderer.toneMappingExposure = 1.2; // Slightly increased for better visibility
+                renderer.toneMappingExposure = 1.2; 
                 const container = document.getElementById('container');
                 container.innerHTML = '';
                 container.appendChild(renderer.domElement);
@@ -1090,24 +1115,31 @@
                 return;
             }
 
-            ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+            ambientLight = new THREE.AmbientLight(0xffffff, 0.5); // Initial intensity
             scene.add(ambientLight);
-            directionalLight = new THREE.DirectionalLight(0xffffff, 1.0);
-            directionalLight.position.set(50, 100, 20);
+            directionalLight = new THREE.DirectionalLight(0xffffff, 1.0); // Initial intensity
+            directionalLight.position.set(50, 100, 20); // Default position
             directionalLight.castShadow = true;
             directionalLight.shadow.camera.near = 0.5;
-            // Tighter shadow frustum
-            directionalLight.shadow.camera.left = -roadLength * 0.25;
-            directionalLight.shadow.camera.right = roadLength * 0.25;
-            directionalLight.shadow.camera.top = roadLength * 0.25;
-            directionalLight.shadow.camera.bottom = -roadLength * 0.25;
-            directionalLight.shadow.camera.far = 180; // Reduced far plane for shadows
-            // Shadow map size set in updatePerformanceSettings
+            // Shadow frustum and map size are now set in updatePerformanceSettings
+            // If updatePerformanceSettings was called before light creation, call it again or apply settings here
+            // It's cleaner if updatePerformanceSettings can handle pre-existing objects if any
+            if (directionalLight.shadow) { // Ensure shadow object exists
+                const shadowMapSize = reduceEnvironmentComplexityMobile ? 512 : 1024;
+                directionalLight.shadow.mapSize.width = shadowMapSize;
+                directionalLight.shadow.mapSize.height = shadowMapSize;
+                directionalLight.shadow.camera.far = reduceEnvironmentComplexityMobile ? 120 : 180;
+                const frustumSizeFactor = reduceEnvironmentComplexityMobile ? 0.18 : 0.25;
+                directionalLight.shadow.camera.left = -roadLength * frustumSizeFactor;
+                directionalLight.shadow.camera.right = roadLength * frustumSizeFactor;
+                directionalLight.shadow.camera.top = roadLength * frustumSizeFactor;
+                directionalLight.shadow.camera.bottom = -roadLength * frustumSizeFactor;
+            }
             scene.add(directionalLight);
 
 
             const textureLoader = new THREE.TextureLoader(loadingManager);
-            if (!reduceEnvironmentComplexityMobile) {
+            if (!reduceEnvironmentComplexityMobile) { // Lensflare only on non-mobile
                 try {
                     const textureFlare0 = textureLoader.load("https://threejs.org/examples/textures/lensflare/lensflare0.png");
                     const textureFlare3 = textureLoader.load("https://threejs.org/examples/textures/lensflare/lensflare3.png");
@@ -1140,16 +1172,15 @@
             road.receiveShadow = true;
             scene.add(road);
 
-            // Instanced Road Lines
             const lineLength = 3; const lineGap = 5;
-            const numRoadLinesToCreate = Math.floor(roadLength / (lineLength + lineGap)) + 10; // Buffer
+            const numRoadLinesToCreate = Math.floor(roadLength / (lineLength + lineGap)) + 10; 
             const lineGeo = new THREE.PlaneGeometry(0.25, lineLength);
             const lineMat = new THREE.MeshStandardMaterial({ color: 0xeeeeee });
             roadLineInstanceMesh = new THREE.InstancedMesh(lineGeo, lineMat, numRoadLinesToCreate);
             roadLineInstanceMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
             const lineDummy = new THREE.Object3D();
             lineDummy.rotation.x = -Math.PI / 2;
-            lineDummy.position.y = 0.0051; // Slightly above road
+            lineDummy.position.y = 0.0051; 
             for (let i = 0; i < numRoadLinesToCreate; i++) {
                 lineDummy.position.z = (roadLength / 2) - (lineLength / 2) - i * (lineLength + lineGap);
                 lineDummy.updateMatrix();
@@ -1165,31 +1196,31 @@
             const kerbMat = new THREE.MeshStandardMaterial({ map: kerbTexture, roughness: 0.7 });
             kerbs = [];
             [-1, 1].forEach(side => {
-                const kerb = new THREE.Mesh(kerbGeo, kerbMat.clone());
+                const kerb = new THREE.Mesh(kerbGeo, kerbMat.clone()); // Clone material if it has unique properties like map offset
                 kerb.position.set(side * (roadWidth / 2 + kerbWidth / 2), kerbHeight / 2, 0);
-                kerb.castShadow = false;
+                kerb.castShadow = false; // Kerbs generally don't need to cast shadows
                 kerb.receiveShadow = true;
                 kerbs.push(kerb); scene.add(kerb);
             });
 
-            cloudMaterial = new THREE.MeshBasicMaterial({
+            cloudMaterial = new THREE.MeshBasicMaterial({ // Basic material for clouds is cheaper
                 color: 0xffffff, transparent: true, opacity: 0.6, depthWrite: false
             });
 
-            createEnvironmentAssets(); // Buildings, StreetLights, Clouds, Stars
+            createEnvironmentAssets(); // Create buildings, lights, clouds, stars using effectiveNum...
 
-            pointGeometry = new THREE.SphereGeometry(pointRadius, reduceEnvironmentComplexityMobile ? 8 : 12, reduceEnvironmentComplexityMobile ? 6 : 8);
+            // OPTIMIZATION: Simpler point geometry for mobile
+            pointGeometry = new THREE.SphereGeometry(pointRadius, reduceEnvironmentComplexityMobile ? 6 : 12, reduceEnvironmentComplexityMobile ? 4 : 8);
             pointMaterial = new THREE.MeshStandardMaterial({ color: 0xffcc00, emissive: 0xeeaa00, emissiveIntensity: 0.7, roughness: 0.3 });
-            points.length = 0;
+            points.length = 0; // Clear if re-initializing
             for (let i = 0; i < numPoints; i++) {
-                const point = new THREE.Mesh(pointGeometry, pointMaterial.clone());
-                point.castShadow = false; point.receiveShadow = false;
+                const point = new THREE.Mesh(pointGeometry, pointMaterial.clone()); // Clone material for potential individual changes
+                point.castShadow = false; point.receiveShadow = false; // Points don't need shadows
                 points.push(point);
-                resetPointPosition(point, true);
+                resetPointPosition(point, true); // Initial placement
                 scene.add(point);
             }
 
-            // Initialize Instanced Particle Systems
             createRainParticleSystem_Instanced();
             createExhaustParticleSystem_Instanced();
             createSkidMarkSystem_Instanced();
@@ -1204,7 +1235,7 @@
 
             setupControls();
             updateScoreDisplay(); updateDistanceDisplay(); updateSpeedometer();
-            updateDayCycleAndWeather(0);
+            updateDayCycleAndWeather(0); // Initial call
             animate();
         }
 
@@ -1222,21 +1253,25 @@
             const buildingBaseColors = [ 0xaaaaaa, 0x888890, 0x999080, 0x777777, 0x605550, 0xacb2b7, 0xb5a89a, 0x5a6469 ];
             function createBuilding() {
                 const height = Math.random() * 25 + 15; const width = Math.random() * 6 + 5; const depth = Math.random() * 6 + 5;
-                const buildingGeo = new THREE.BoxGeometry(width, height, depth);
+                const buildingGeo = new THREE.BoxGeometry(width, height, depth); // Box is cheap
                 const selectedBaseColorHex = buildingBaseColors[Math.floor(Math.random() * buildingBaseColors.length)];
                 const wallTexture = createWindowTexture(selectedBaseColorHex, width, height);
                 const wallMaterial = new THREE.MeshStandardMaterial({ map: wallTexture, roughness: 0.6 + Math.random() * 0.3, metalness: Math.random() * 0.1, color: 0xffffff });
                 const roofColor = new THREE.Color(selectedBaseColorHex).multiplyScalar(0.8);
                 const roofMaterial = new THREE.MeshStandardMaterial({ color: roofColor, roughness: 0.8, metalness: 0.1 });
                 const building = new THREE.Mesh(buildingGeo, [wallMaterial, wallMaterial, roofMaterial, roofMaterial, wallMaterial, wallMaterial]);
-                building.position.y = height / 2 - 0.04; building.castShadow = true; building.receiveShadow = true; return building;
+                building.position.y = height / 2 - 0.04; // Align base with ground
+                // OPTIMIZATION: Buildings don't cast shadows on mobile
+                building.castShadow = !reduceEnvironmentComplexityMobile; 
+                building.receiveShadow = true; 
+                return building;
             }
-            buildings.forEach(b => scene.remove(b)); // Clear old if any (for potential re-init logic)
+            buildings.forEach(b => { if (b.parent) b.parent.remove(b); b.geometry.dispose(); b.material.forEach(m => m.dispose()); }); // Clear old
             buildings = [];
             for (let i = 0; i < effectiveNumBuildings; i++) {
                 [-1, 1].forEach(side => {
                     const building = createBuilding();
-                    const currentBuildingSpacing = buildingSpacingBase * (reduceEnvironmentComplexityMobile ? 2.0 : 1.0);
+                    const currentBuildingSpacing = buildingSpacingBase * (reduceEnvironmentComplexityMobile ? 2.5 : 1.0);
                     const zPos = (roadLength / 2) - (currentBuildingSpacing / 2) - i * currentBuildingSpacing + (Math.random()-0.5) * currentBuildingSpacing * 0.5;
                     const xOffset = roadWidth / 2 + kerbWidth + 2 + Math.random() * 8 + building.geometry.parameters.width / 2;
                     building.position.set(side * xOffset, building.position.y, zPos);
@@ -1245,18 +1280,32 @@
             }
 
             function createStreetLight() {
-                const group = new THREE.Group(); const poleHeight = 7; const poleRadius = 0.1; const poleGeo = new THREE.CylinderGeometry(poleRadius, poleRadius * 1.2, poleHeight, reduceEnvironmentComplexityMobile? 6:8); const poleMat = new THREE.MeshStandardMaterial({ color: 0x777777, metalness: 0.9, roughness: 0.3 }); const pole = new THREE.Mesh(poleGeo, poleMat);
-                pole.castShadow = true; pole.position.y = poleHeight/2; group.add(pole);
+                const group = new THREE.Group(); 
+                const poleHeight = 7; const poleRadius = 0.1; 
+                // OPTIMIZATION: Simpler cylinder for pole on mobile
+                const poleGeo = new THREE.CylinderGeometry(poleRadius, poleRadius * 1.2, poleHeight, reduceEnvironmentComplexityMobile? 5:8); 
+                const poleMat = new THREE.MeshStandardMaterial({ color: 0x777777, metalness: 0.9, roughness: 0.3 }); const pole = new THREE.Mesh(poleGeo, poleMat);
+                // OPTIMIZATION: Streetlight poles don't cast shadows on mobile
+                pole.castShadow = !reduceEnvironmentComplexityMobile; 
+                pole.position.y = poleHeight/2; group.add(pole);
+                
                 const armLength = 1.5; const armGeo = new THREE.BoxGeometry(armLength, poleRadius * 1.8, poleRadius * 1.8); const arm = new THREE.Mesh(armGeo, poleMat);
-                arm.castShadow = true; arm.position.set(0, poleHeight - poleRadius * 2.5, 0); group.add(arm);
-                const lightFixtureGeo = new THREE.SphereGeometry(poleRadius * 2.5, reduceEnvironmentComplexityMobile ? 6 : 16, reduceEnvironmentComplexityMobile ? 3 : 8); const lightFixtureMat = new THREE.MeshStandardMaterial({ color: 0xffffdd, emissive: 0xffffaa, emissiveIntensity: 0 });  const lightFixture = new THREE.Mesh(lightFixtureGeo, lightFixtureMat);
-                lightFixture.castShadow = false; lightFixture.position.set(0, poleHeight - poleRadius * 2.5, 0); group.add(lightFixture);
-                const pointLight = new THREE.PointLight(0xffffee, 0, 15, 1.5);
-                pointLight.castShadow = false; pointLight.visible = false;
-                lightFixture.add(pointLight);
+                arm.castShadow = !reduceEnvironmentComplexityMobile; // Arm either
+                arm.position.set(0, poleHeight - poleRadius * 2.5, 0); group.add(arm);
+                
+                // OPTIMIZATION: Simpler sphere for fixture on mobile
+                const lightFixtureGeo = new THREE.SphereGeometry(poleRadius * 2.5, reduceEnvironmentComplexityMobile ? 5 : 16, reduceEnvironmentComplexityMobile ? 3 : 8); 
+                const lightFixtureMat = new THREE.MeshStandardMaterial({ color: 0xffffdd, emissive: 0xffffaa, emissiveIntensity: 0 });  const lightFixture = new THREE.Mesh(lightFixtureGeo, lightFixtureMat);
+                lightFixture.castShadow = false; // Fixture itself doesn't cast shadow
+                lightFixture.position.set(0, poleHeight - poleRadius * 2.5, 0); group.add(lightFixture);
+                
+                const pointLight = new THREE.PointLight(0xffffee, 0, 15, 1.5); // Intensity 0 initially, distance 15, decay 1.5
+                pointLight.castShadow = false; // Streetlights' point lights do not cast shadows (VERY important for perf)
+                pointLight.visible = false; // Initially off
+                lightFixture.add(pointLight); // Add to fixture so it moves with it
                 group.userData = { armLength: armLength, fixture: lightFixture, light: pointLight }; return group;
             }
-            streetLights.forEach(sl => scene.remove(sl));
+            streetLights.forEach(sl => { if (sl.parent) sl.parent.remove(sl); sl.traverse(o => {if(o.geometry) o.geometry.dispose(); if(o.material) o.material.dispose();})}); // Clear old
             streetLights = [];
             for (let i = 0; i < effectiveNumLights; i++) {
                 const zPos = (roadLength / 2) - (lightSpacingBase / 2) - i * lightSpacingBase + (Math.random()-0.5) * lightSpacingBase * 0.5;
@@ -1264,24 +1313,26 @@
                     const light = createStreetLight();
                     const xPos = roadWidth / 2 + kerbWidth + 1.0;
                     light.position.set(side * xPos, 0, zPos);
-                    light.rotation.y = side > 0 ? -Math.PI / 2.5 : Math.PI / 2.5;
-                    light.children[1].position.x = -light.userData.armLength / 2; light.children[2].position.x = -light.userData.armLength;
+                    light.rotation.y = side > 0 ? -Math.PI / 2.5 : Math.PI / 2.5; // Angle arm over road
+                    light.children[1].position.x = -light.userData.armLength / 2; // Adjust arm mesh position
+                    light.children[2].position.x = -light.userData.armLength; // Adjust fixture mesh position
                     streetLights.push(light); scene.add(light);
                 });
             }
 
-            trafficLights.forEach(tl => scene.remove(tl));
+            trafficLights.forEach(tl => { if (tl.parent) tl.parent.remove(tl);}); // Clear old if any
             trafficLights = []; // Not implemented visually yet
 
-            clouds.forEach(c => scene.remove(c));
+            clouds.forEach(c => { if (c.parent) c.parent.remove(c); c.traverse(o => {if(o.geometry) o.geometry.dispose(); if(o.material) o.material.dispose();}) }); // Clear old
             clouds = [];
             for (let i = 0; i < effectiveNumClouds; i++) {
                 const cloudGroup = new THREE.Group();
-                const numSpheres = reduceEnvironmentComplexityMobile ? (Math.floor(Math.random() * 2) + 2) : (Math.floor(Math.random() * 5) + 3);
+                const numSpheres = reduceEnvironmentComplexityMobile ? (Math.floor(Math.random() * 2) + 1) : (Math.floor(Math.random() * 5) + 3); // Fewer spheres for mobile clouds
                 for(let j=0; j < numSpheres; j++) {
                     const size = Math.random() * 5 + 3;
-                    const cloudPartGeo = new THREE.SphereGeometry(size, reduceEnvironmentComplexityMobile ? 6:8, reduceEnvironmentComplexityMobile ? 4:6);
-                    const cloudPart = new THREE.Mesh(cloudPartGeo, cloudMaterial.clone()); // Clone material for individual opacity/color changes later if needed
+                    // OPTIMIZATION: Simpler sphere geometry for cloud parts on mobile
+                    const cloudPartGeo = new THREE.SphereGeometry(size, reduceEnvironmentComplexityMobile ? 5:8, reduceEnvironmentComplexityMobile ? 3:6);
+                    const cloudPart = new THREE.Mesh(cloudPartGeo, cloudMaterial.clone()); 
                     cloudPart.position.set( (Math.random() - 0.5) * 10, (Math.random() - 0.5) * 2, (Math.random() - 0.5) * 3 );
                     cloudGroup.add(cloudPart);
                 }
@@ -1290,10 +1341,10 @@
                 clouds.push(cloudGroup); scene.add(cloudGroup);
             }
 
-            if (stars && stars.geometry) stars.geometry.dispose(); if (stars && stars.material) stars.material.dispose(); scene.remove(stars);
+            if (stars) { if (stars.parent) stars.parent.remove(stars); if (stars.geometry) stars.geometry.dispose(); if (stars.material) stars.material.dispose(); stars = null;}
             const starMaterial = new THREE.PointsMaterial({ color: 0xffffff, size: 0.2, sizeAttenuation: true, transparent: true, opacity: 0, depthWrite: false });
             const starVertices = [];
-            for (let i = 0; i < effectiveNumStars; i++) {
+            for (let i = 0; i < effectiveNumStars; i++) { // Use effectiveNumStars
                 starVertices.push(THREE.MathUtils.randFloatSpread(roadLength * 3), THREE.MathUtils.randFloat(50, 150), THREE.MathUtils.randFloatSpread(roadLength * 3));
             }
             const starGeometry = new THREE.BufferGeometry();
@@ -1308,37 +1359,46 @@
             const dracoLoader = new DRACOLoader(loadingManager);
             dracoLoader.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.7/');
             loader.setDRACOLoader(dracoLoader);
-            const carUrl = 'https://threejs.org/examples/models/gltf/ferrari.glb';
+            const carUrl = 'https://threejs.org/examples/models/gltf/ferrari.glb'; // This model might be high-poly
 
             loader.load(carUrl, (gltf) => {
                 console.log("Ferrari GLB loaded successfully.");
                 carModel = gltf.scene; carModel.scale.set(0.7,0.7,0.7);
                 const tempBox = new THREE.Box3().setFromObject(carModel); tempBox.getSize(playerSize);
                 carBaseY = -tempBox.min.y * carModel.scale.y + 0.02; carModel.position.set(0, carBaseY, -5); carModel.rotation.y = Math.PI;
-                carModel.traverse((node) => { if (node.isMesh) { node.castShadow = true; node.receiveShadow = true; } });
+                carModel.traverse((node) => { if (node.isMesh) { node.castShadow = true; node.receiveShadow = true; } }); // Player car casts shadow
                 scene.add(carModel);
-                headlightLeft = new THREE.SpotLight(0xffffee,0,30,Math.PI/6,0.3,1); headlightLeft.castShadow = false; headlightLeft.visible = false;
+                
+                headlightLeft = new THREE.SpotLight(0xffffee,0,30,Math.PI/6,0.3,1); headlightLeft.castShadow = false; headlightLeft.visible = false; // Headlights don't cast shadow
                 headlightLeft.position.set(-0.7,0.6,2.0).multiplyScalar(carModel.scale.x); carModel.add(headlightLeft); carModel.add(headlightLeft.target);
                 headlightLeft.target.position.set(-0.6,0.3,10).multiplyScalar(carModel.scale.x);
                 headlightRight = headlightLeft.clone(); headlightRight.visible = false; headlightRight.position.set(0.7,0.6,2.0).multiplyScalar(carModel.scale.x);
                 carModel.add(headlightRight); carModel.add(headlightRight.target); headlightRight.target.position.set(0.6,0.3,10).multiplyScalar(carModel.scale.x);
-                taillightLeft = new THREE.PointLight(0xff0000,0,5,2); taillightLeft.position.set(-0.8,0.5,-2.2).multiplyScalar(carModel.scale.x); carModel.add(taillightLeft);
-                taillightRight = taillightLeft.clone(); taillightRight.position.set(0.8,0.5,-2.2).multiplyScalar(carModel.scale.x); carModel.add(taillightRight);
+                
+                taillightLeft = new THREE.PointLight(0xff0000,0,5,2); taillightLeft.castShadow = false; taillightLeft.position.set(-0.8,0.5,-2.2).multiplyScalar(carModel.scale.x); carModel.add(taillightLeft);
+                taillightRight = taillightLeft.clone(); taillightRight.castShadow = false; taillightRight.position.set(0.8,0.5,-2.2).multiplyScalar(carModel.scale.x); carModel.add(taillightRight);
+                
                 enemyCar = carModel.clone(); const tempEnemyBox = new THREE.Box3().setFromObject(enemyCar); tempEnemyBox.getSize(enemySize);
                 enemyCar.traverse((node) => {
-                    if (node.isMesh) { const blueMaterial = node.material.clone(); blueMaterial.color.setHex(0x3366ff); node.material = blueMaterial; node.castShadow = true; node.receiveShadow = true; }
-                    if (node.isLight) node.intensity = 0;
+                    if (node.isMesh) { 
+                        const blueMaterial = node.material.clone(); blueMaterial.color.setHex(0x3366ff); node.material = blueMaterial; 
+                        node.castShadow = true; node.receiveShadow = true; // Enemy car also casts shadow
+                    }
+                    if (node.isLight) node.intensity = 0; // Disable lights on enemy car clone
                 });
                 resetEnemyCar(); scene.add(enemyCar);
                 camera.position.set(0,carBaseY+2.8,carModel.position.z-6.5); camera.lookAt(carModel.position.x,carBaseY+1.0,carModel.position.z+3.0);
             },
-            null,
+            null, // onProgress callback (not used here for the main model)
             (error) => {
-                console.error('Error loading car model (ferrari.glb):', error);
+                console.error('Error loading car model (ferrari.glb):', error); // Fallback if model fails
                 const fallbackGeo = new THREE.BoxGeometry(1.8,1,3.5); playerSize.set(1.8,1,3.5); enemySize.copy(playerSize);
                 const fallbackMat = new THREE.MeshStandardMaterial({color:0xff0000}); carModel = new THREE.Mesh(fallbackGeo,fallbackMat);
                 carBaseY = 0.5+0.01; carModel.position.set(0,carBaseY,-5); carModel.castShadow = true; carModel.receiveShadow = true;
-                scene.add(carModel); camera.position.set(0,carBaseY+2.8,carModel.position.z-6.5); camera.lookAt(carModel.position.x,carBaseY+1.0,carModel.position.z+3.0);
+                scene.add(carModel); 
+                enemyCar = carModel.clone(); // Fallback enemy car
+                resetEnemyCar(); scene.add(enemyCar);
+                camera.position.set(0,carBaseY+2.8,carModel.position.z-6.5); camera.lookAt(carModel.position.x,carBaseY+1.0,carModel.position.z+3.0);
             });
         }
 
@@ -1355,7 +1415,6 @@
                 carModel.rotation.set(0, Math.PI, 0);
             }
             carVelocity = 0;
-            // updateSpeedometer(); // Will be updated by throttled UI update
 
             if (countdownDisplayElement) {
                 countdownDisplayElement.textContent = countdownValue;
@@ -1387,7 +1446,7 @@
                             playSound('engine', true);
                         }
                     }
-                } else {
+                } else { // Fallback if display element is somehow lost
                      clearInterval(countdownInterval);
                      countdownInterval = null;
                      isCountingDown = false;
@@ -1405,11 +1464,11 @@
                 switch (event.key.toLowerCase()) {
                     case 'arrowleft': case 'a': moveLeft = true; break;
                     case 'arrowright': case 'd': moveRight = true; break;
-                    case 'r': isRaining = !isRaining; updateRainSound(); break;
+                    case 'r': isRaining = !isRaining; updateRainSound(); break; // Toggle rain for debug
                 }
             });
             window.addEventListener('keyup', (event) => {
-                if (currentPageId !== 'game-page') return;
+                if (currentPageId !== 'game-page') return; // Keyup can happen on any page
                 switch (event.key.toLowerCase()) {
                     case 'arrowleft': case 'a': moveLeft = false; break;
                     case 'arrowright': case 'd': moveRight = false; break;
@@ -1419,48 +1478,44 @@
             const leftBtn = document.getElementById('left-button');
             const rightBtn = document.getElementById('right-button');
 
-            // Prevent default touch behaviors on the game page
             const gamePage = document.getElementById('game-page');
             if (gamePage) {
-                gamePage.addEventListener('touchmove', (e) => {
+                gamePage.addEventListener('touchmove', (e) => { // Prevent scrolling/zooming on game page
                     if (currentPageId === 'game-page') {
                         e.preventDefault();
                     }
                 }, { passive: false });
             }
 
-            // Improved touch event handling
             const handleTouchStart = (e, direction) => {
                 if (!isGameOver && !isCountingDown && currentPageId === 'game-page') {
-                    e.preventDefault();
+                    e.preventDefault(); // Prevent default only if game is active
                     if (direction === 'left') moveLeft = true;
                     if (direction === 'right') moveRight = true;
                 }
             };
 
             const handleTouchEnd = (e, direction) => {
-                if (currentPageId === 'game-page') {
-                    e.preventDefault();
+                 // No preventDefault here by default, as it might interfere with other UI if game is over
+                if (currentPageId === 'game-page') { // Only act if on game page
                     if (direction === 'left') moveLeft = false;
                     if (direction === 'right') moveRight = false;
                 }
             };
 
-            // Add touch events with proper handling
             if (leftBtn) {
                 leftBtn.addEventListener('touchstart', (e) => handleTouchStart(e, 'left'), { passive: false });
-                leftBtn.addEventListener('touchend', (e) => handleTouchEnd(e, 'left'), { passive: false });
-                leftBtn.addEventListener('touchcancel', (e) => handleTouchEnd(e, 'left'), { passive: false });
+                leftBtn.addEventListener('touchend', (e) => handleTouchEnd(e, 'left'), { passive: true }); // touchend can be passive
+                leftBtn.addEventListener('touchcancel', (e) => handleTouchEnd(e, 'left'), { passive: true });
             }
 
             if (rightBtn) {
                 rightBtn.addEventListener('touchstart', (e) => handleTouchStart(e, 'right'), { passive: false });
-                rightBtn.addEventListener('touchend', (e) => handleTouchEnd(e, 'right'), { passive: false });
-                rightBtn.addEventListener('touchcancel', (e) => handleTouchEnd(e, 'right'), { passive: false });
+                rightBtn.addEventListener('touchend', (e) => handleTouchEnd(e, 'right'), { passive: true });
+                rightBtn.addEventListener('touchcancel', (e) => handleTouchEnd(e, 'right'), { passive: true });
             }
-
-            // Add visual feedback for touch controls
-            const addTouchFeedback = (button) => {
+            
+            const addTouchFeedback = (button) => { // Visual feedback for buttons
                 if (!button) return;
                 button.addEventListener('touchstart', () => {
                     button.style.backgroundColor = 'rgba(255, 255, 255, 0.65)';
@@ -1489,48 +1544,47 @@
             score = 0; distanceTraveled = 0; carVelocity = 0; currentDisplaySpeed = 0;
             carCurrentYOffset = 0; suspensionVelocity = 0;
             currentPatternIndex = 0; coinsInCurrentPattern = 0; targetCoinsForPattern = 5 + Math.floor(Math.random() * 3);
-            lastUiUpdateTime = 0; // Reset UI update timer
+            lastUiUpdateTime = 0; 
 
             resetEnemyCar();
             points.forEach(p => resetPointPosition(p, true));
 
-            // Reset Instanced Meshes
             if (skidInstanceMesh) {
-                skidInstanceData = [];
+                skidInstanceData.forEach(d => d.active = false); // Deactivate all
                 skidInstanceMesh.count = 0;
                 if(skidInstanceMesh.instanceMatrix) skidInstanceMesh.instanceMatrix.needsUpdate = true;
                 nextSkidMarkIndex = 0;
             }
             if (exhaustInstanceMesh) {
-                exhaustInstanceData = [];
+                exhaustInstanceData.forEach(d => d.active = false); // Deactivate all
                 exhaustInstanceMesh.count = 0;
                 if(exhaustInstanceMesh.instanceMatrix) exhaustInstanceMesh.instanceMatrix.needsUpdate = true;
             }
             if (rainInstanceMesh) {
-                rainInstanceData.forEach(data => data.active = false); // Deactivate all
-                rainInstanceMesh.count = 0; // Visually hide
+                rainInstanceData.forEach(data => data.active = false); 
+                rainInstanceMesh.count = 0; 
                 if(rainInstanceMesh.instanceMatrix) rainInstanceMesh.instanceMatrix.needsUpdate = true;
             }
-            if (roadLineInstanceMesh) { // Reset main roadLineInstanceMesh position
+            if (roadLineInstanceMesh) { 
                 roadLineInstanceMesh.position.z = 0;
             }
 
 
             gameOverElement.style.display = 'none';
-            updateScoreDisplay(); updateDistanceDisplay(); updateSpeedometer(); // Initial update
+            updateScoreDisplay(); updateDistanceDisplay(); updateSpeedometer(); 
 
             if (sounds.engine) stopSound('engine');
-            updateRainSound();
-            updateDayCycleAndWeather(0);
+            updateRainSound(); // Handles stopping rain sound if it was on
+            updateDayCycleAndWeather(0); // Reset visual state
             if (camera) { camera.fov = baseFov; camera.updateProjectionMatrix(); }
 
             initiateCountdown();
         }
 
         function resetEnemyCar() {
-             if (!enemyCar || !carModel) return; enemyCar.rotation.y = 0;
+             if (!enemyCar || !carModel) return; enemyCar.rotation.y = 0; // Assuming enemy always faces forward relative to world
             const initialEnemyX = (Math.random() < 0.5 ? -1 : 1) * (roadWidth / 4) * (0.8 + Math.random() * 0.4);
-            const initialEnemyZ = carModel.position.z + roadLength * (0.7 + Math.random() * 0.5);
+            const initialEnemyZ = carModel.position.z + roadLength * (0.7 + Math.random() * 0.5); // Spawn ahead of player
             enemyCar.position.set(initialEnemyX, carBaseY, initialEnemyZ);
             enemyTargetX = initialEnemyX; enemyCar.visible = true;
         }
@@ -1543,14 +1597,19 @@
             }
             const currentPattern = coinPatterns[currentPatternIndex];
             switch (currentPattern) { case 'left': targetX = -laneXOffset; break; case 'right': targetX = laneXOffset; break; default: targetX = 0; }
-            point.position.x = targetX; point.position.y = pointRadius + 0.02;
+            point.position.x = targetX; point.position.y = pointRadius + 0.02; // Slightly above ground
             const carZ = carModel ? carModel.position.z : 0;
-            if (initial) { point.position.z = carZ + 20 + (points.indexOf(point) * 12); }
-            else {
-                let furthestVisibleCoinZInLane = carZ;
-                points.forEach(p => { if (p.visible && p !== point && Math.abs(p.position.x - targetX) < 0.01 && p.position.z > furthestVisibleCoinZInLane) furthestVisibleCoinZInLane = p.position.z; });
-                const ZSpacingInPattern = 10 + Math.random() * 5; const minZFromCar = carZ + roadLength * 0.4;
-                let newZ = (furthestVisibleCoinZInLane > carZ) ? furthestVisibleCoinZInLane + ZSpacingInPattern : minZFromCar + Math.random() * roadLength * 0.2;
+            if (initial) { point.position.z = carZ + 20 + (points.indexOf(point) * 12); } // Spread out initially
+            else { // Reposition ahead of the furthest coin in the same lane or ahead of car
+                let furthestVisibleCoinZInLane = carZ; // Start with car's Z
+                points.forEach(p => { 
+                    if (p.visible && p !== point && Math.abs(p.position.x - targetX) < 0.01 && p.position.z > furthestVisibleCoinZInLane) {
+                        furthestVisibleCoinZInLane = p.position.z; 
+                    }
+                });
+                const ZSpacingInPattern = 10 + Math.random() * 5; 
+                const minZFromCar = carZ + roadLength * 0.4; // Ensure it's far enough ahead
+                let newZ = (furthestVisibleCoinZInLane > carZ + 1) ? furthestVisibleCoinZInLane + ZSpacingInPattern : minZFromCar + Math.random() * roadLength * 0.2;
                 point.position.z = Math.max(newZ, minZFromCar);
             }
             coinsInCurrentPattern++; point.visible = true;
@@ -1559,60 +1618,63 @@
         function updateScoreDisplay() { if(scoreElement) scoreElement.textContent = `Score: ${score}`; }
         function updateDistanceDisplay() { if(distanceElement) distanceElement.textContent = `Distance: ${Math.floor(distanceTraveled)} m`; }
         function updateSpeedometer() {
-             currentDisplaySpeed = Math.floor(Math.abs(carVelocity * 100));
+             currentDisplaySpeed = Math.floor(Math.abs(carVelocity * 100)); // km/h like display
              if(speedometerElement) speedometerElement.textContent = `Speed: ${currentDisplaySpeed} km/h`;
         }
 
         function onWindowResize() {
             if (!camera || !renderer) return;
             const newWidth = window.innerWidth; const newHeight = window.innerHeight;
-            updatePerformanceSettings(); // This will also update renderer pixel ratio
+            
+            // This will update reduceEnvironmentComplexityMobile and related settings
+            updatePerformanceSettings(); 
+            // createEnvironmentAssets(); // This would be too heavy for every resize.
+                                     // For now, complexity is set at init.
+                                     // A more robust solution would dynamically adjust assets.
+
             camera.aspect = newWidth / newHeight; camera.updateProjectionMatrix();
-            renderer.setSize(newWidth, newHeight);
+            // renderer.setSize is handled by updatePerformanceSettings
         }
 
         // --- Instanced Particle System: Rain ---
         function createRainParticleSystem_Instanced() {
-            if (rainInstanceMesh) scene.remove(rainInstanceMesh);
-            const rainGeo = new THREE.CylinderGeometry(0.01, 0.01, 0.7, reduceEnvironmentComplexityMobile ? 3 : 5); // Simpler geo
+            if (rainInstanceMesh) { scene.remove(rainInstanceMesh); rainInstanceMesh.geometry.dispose(); rainInstanceMesh.material.dispose(); }
+            const rainGeo = new THREE.CylinderGeometry(0.01, 0.01, 0.7, reduceEnvironmentComplexityMobile ? 3 : 5); 
             const rainMat = new THREE.MeshBasicMaterial({ color:0xabcdef, transparent:true, opacity:0.3, depthWrite: false });
-            rainInstanceMesh = new THREE.InstancedMesh(rainGeo, rainMat, MAX_RAIN_PARTICLES_INSTANCED);
+            rainInstanceMesh = new THREE.InstancedMesh(rainGeo, rainMat, ABSOLUTE_MAX_RAIN_PARTICLES); // Use absolute max for mesh creation
             rainInstanceMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
-            rainInstanceMesh.visible = false; // Initially hidden
+            rainInstanceMesh.visible = false; 
             scene.add(rainInstanceMesh);
             rainInstanceData = [];
-            for (let i = 0; i < MAX_RAIN_PARTICLES_INSTANCED; i++) {
-                const yPos = camera.position.y + Math.random() * 25 + 15; // Start higher and more spread
+            for (let i = 0; i < ABSOLUTE_MAX_RAIN_PARTICLES; i++) {
+                const yPos = Math.random() * 25 + 15; // Initial Y range relative to camera
                 rainInstanceData.push({
-                    matrix: new THREE.Matrix4().setPosition(
-                        camera.position.x + (Math.random() - 0.5) * roadWidth * 4, // Wider spread
-                        yPos,
-                        camera.position.z + (Math.random() - 0.5) * roadLength * 0.8
-                    ),
+                    matrix: new THREE.Matrix4(), // Will be set when activated
                     initialY: yPos,
-                    speed: 1.2 + Math.random() * 0.8, // Base speed
-                    active: false // All inactive initially
+                    speed: 1.2 + Math.random() * 0.8, 
+                    active: false 
                 });
             }
         }
 
         function updateRainParticles_Instanced(delta) {
-            if (!rainInstanceMesh || !isRaining || !gameHasStartedAfterCountdown) {
+            if (!rainInstanceMesh || !isRaining || !gameHasStartedAfterCountdown || !camera) {
                 if(rainInstanceMesh) rainInstanceMesh.visible = false;
                 return;
             }
             rainInstanceMesh.visible = true;
             let activeCount = 0;
-            const tiltAngle = -carVelocity * 0.07; // Rain tilting with speed
+            const tiltAngle = -carVelocity * 0.07; 
 
             rainInstanceData.forEach((data, i) => {
-                if (!data.active && Math.random() < 0.05) { // Chance to activate a particle
+                if (!data.active && activeCount < effectiveMaxRainParticles && Math.random() < 0.05) { // Activate if below effective max
                     data.active = true;
                      _tempObject.position.set(
-                        camera.position.x + (Math.random() - 0.5) * roadWidth * 4,
-                        data.initialY + (Math.random() - 0.5) * 10, // Respawn height variation
+                        camera.position.x + (Math.random() - 0.5) * roadWidth * 4, // Wider spawn area
+                        camera.position.y + data.initialY + (Math.random() - 0.5) * 10, // Spawn relative to camera Y
                         camera.position.z + (Math.random() - 0.5) * roadLength * 0.8 + carVelocity * 10 // Spawn ahead
                     );
+                    _tempObject.rotation.set(0,0,0); _tempObject.scale.set(1,1,1); // Reset rotation/scale
                     _tempObject.updateMatrix();
                     data.matrix.copy(_tempObject.matrix);
                 }
@@ -1621,13 +1683,12 @@
                     _tempObject.matrix.copy(data.matrix);
                     _tempObject.matrix.decompose(_tempObject.position, _tempObject.quaternion, _tempObject.scale);
 
-                    _tempObject.position.y -= (data.speed + carVelocity * 0.4) * delta * 10; // Adjusted speed logic
-                     _tempEuler.set(tiltAngle, 0, (Math.random() - 0.5) * 0.1); // Slight random Z rotation
+                    _tempObject.position.y -= (data.speed + carVelocity * 0.4) * delta * 10; 
+                    _tempEuler.set(tiltAngle, 0, (Math.random() - 0.5) * 0.1); 
                     _tempObject.quaternion.setFromEuler(_tempEuler);
 
-
-                    if (_tempObject.position.y < camera.position.y - 5) { // Recycle below camera view
-                        data.active = false; // Deactivate
+                    if (_tempObject.position.y < camera.position.y - 10) { // Recycle if far below camera
+                        data.active = false; 
                     } else {
                         _tempObject.updateMatrix();
                         data.matrix.copy(_tempObject.matrix);
@@ -1637,50 +1698,49 @@
                 }
             });
             rainInstanceMesh.count = activeCount;
-            rainInstanceMesh.instanceMatrix.needsUpdate = true;
+            if (activeCount > 0) rainInstanceMesh.instanceMatrix.needsUpdate = true;
         }
 
         // --- Instanced Particle System: Exhaust ---
         function createExhaustParticleSystem_Instanced() {
-            if (exhaustInstanceMesh) scene.remove(exhaustInstanceMesh);
-            const exhaustGeo = new THREE.SphereGeometry(0.08, reduceEnvironmentComplexityMobile ? 4 : 6, reduceEnvironmentComplexityMobile ? 2 : 3); // Slightly larger base
+            if (exhaustInstanceMesh) { scene.remove(exhaustInstanceMesh); exhaustInstanceMesh.geometry.dispose(); exhaustInstanceMesh.material.dispose(); }
+            const exhaustGeo = new THREE.SphereGeometry(0.08, reduceEnvironmentComplexityMobile ? 4 : 6, reduceEnvironmentComplexityMobile ? 2 : 3); 
             const exhaustMat = new THREE.MeshBasicMaterial({ color:0xcccccc, transparent:true, opacity:0.4, depthWrite:false });
-            exhaustInstanceMesh = new THREE.InstancedMesh(exhaustGeo, exhaustMat, MAX_EXHAUST_PARTICLES_INSTANCED);
+            exhaustInstanceMesh = new THREE.InstancedMesh(exhaustGeo, exhaustMat, ABSOLUTE_MAX_EXHAUST_PARTICLES);
             exhaustInstanceMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
             scene.add(exhaustInstanceMesh);
-            exhaustInstanceData = []; // { matrix, age, maxAge, active }
+            exhaustInstanceData = []; 
+            for (let i=0; i<ABSOLUTE_MAX_EXHAUST_PARTICLES; ++i) {
+                exhaustInstanceData.push({ matrix: new THREE.Matrix4(), age:0, maxAge:0, active:false});
+            }
         }
-
+        
         function addExhaustInstance_Instanced() {
             if (!carModel || !exhaustInstanceMesh || !gameHasStartedAfterCountdown || carVelocity < 0.1) return;
 
             let availableIndex = -1;
+            let currentActiveCount = 0;
             for(let i=0; i < exhaustInstanceData.length; i++) {
-                if(!exhaustInstanceData[i].active) {
-                    availableIndex = i;
-                    break;
-                }
+                if(exhaustInstanceData[i].active) currentActiveCount++;
+                else if (availableIndex === -1) availableIndex = i;
             }
-            if (availableIndex === -1 && exhaustInstanceData.length < MAX_EXHAUST_PARTICLES_INSTANCED) {
-                availableIndex = exhaustInstanceData.length;
-                exhaustInstanceData.push({ matrix: new THREE.Matrix4(), age:0, maxAge:0.8 + Math.random()*0.4, active:false});
-            }
+
+            if (currentActiveCount >= effectiveMaxExhaustParticles) return; // Respect effective limit
 
             if(availableIndex !== -1) {
                 const data = exhaustInstanceData[availableIndex];
                 data.active = true;
                 data.age = 0;
-                data.maxAge = 0.6 + Math.random()*0.3 + carVelocity * 0.2; // Max age depends on speed
+                data.maxAge = 0.6 + Math.random()*0.3 + carVelocity * 0.2; 
 
                 _tempObject.position.copy(carModel.position);
-                // Offset relative to car's back, considering car's rotation
                 const localOffset = new THREE.Vector3((Math.random()-0.5)*0.3, -0.15, -1.9 * (carModel.scale.z || 0.8));
                 localOffset.applyQuaternion(carModel.quaternion);
                 _tempObject.position.add(localOffset);
-                _tempObject.position.y = Math.max(0.15, _tempObject.position.y); // Keep above ground
+                _tempObject.position.y = Math.max(0.15, _tempObject.position.y); 
 
-                _tempObject.quaternion.identity(); // No rotation for spheres
-                _tempObject.scale.set(0.1,0.1,0.1); // Initial small scale
+                _tempObject.quaternion.identity(); 
+                _tempObject.scale.set(0.1,0.1,0.1); 
                 _tempObject.updateMatrix();
                 data.matrix.copy(_tempObject.matrix);
             }
@@ -1688,10 +1748,10 @@
 
         function updateExhaustParticles_Instanced(delta) {
             if (!exhaustInstanceMesh || !gameHasStartedAfterCountdown) return;
-            let activeCount = 0;
+            let activeCountVisual = 0; // For setting InstancedMesh.count
 
-            if (carVelocity > 0.1 && Math.random() < 0.6) { // Chance to add new particle
-                 addExhaustInstance_Instanced();
+            if (carVelocity > 0.1 && Math.random() < 0.6) { 
+                 addExhaustInstance_Instanced(); // addExhaustInstance will respect effectiveMaxExhaustParticles
             }
 
             exhaustInstanceData.forEach(data => {
@@ -1703,103 +1763,113 @@
                         _tempObject.matrix.copy(data.matrix);
                         _tempObject.matrix.decompose(_tempObject.position, _tempObject.quaternion, _tempObject.scale);
 
-                        _tempObject.position.y += (0.01 + carVelocity * 0.005) * (1 - data.age/data.maxAge); // Rise and slow down
-                        _tempObject.position.x -= carVelocity * 0.003 * (1 - data.age/data.maxAge); // Drift back
-                        _tempObject.position.z -= carVelocity * baseDriveSpeed * delta * 0.3; // Move with world slightly slower than car
+                        _tempObject.position.y += (0.01 + carVelocity * 0.005) * (1 - data.age/data.maxAge); 
+                        _tempObject.position.x -= carVelocity * 0.003 * (1 - data.age/data.maxAge); 
+                        _tempObject.position.z -= carVelocity * baseDriveSpeed * delta * 0.3; 
 
-                        const scaleFactor = 0.1 + (data.age / data.maxAge) * (0.8 + carVelocity * 0.3); // Grow
+                        const scaleFactor = 0.1 + (data.age / data.maxAge) * (0.8 + carVelocity * 0.3); 
                         _tempObject.scale.set(scaleFactor, scaleFactor, scaleFactor);
-
-                        // Opacity in material for all instances, or use per-instance color if shader modified
-                        // For now, let global material opacity handle fade (less ideal)
-                        // Or, if using MeshStandardMaterial, could use vertex colors to control opacity if shader allows
-
+                        
                         _tempObject.updateMatrix();
                         data.matrix.copy(_tempObject.matrix);
-                        exhaustInstanceMesh.setMatrixAt(activeCount, data.matrix);
-                        activeCount++;
+                        exhaustInstanceMesh.setMatrixAt(activeCountVisual, data.matrix);
+                        activeCountVisual++;
                     }
                 }
             });
-            exhaustInstanceMesh.count = activeCount;
-            if(activeCount > 0) exhaustInstanceMesh.instanceMatrix.needsUpdate = true;
-            // A global opacity fade might be needed on exhaustInstanceMesh.material if particles don't individually fade
-            exhaustInstanceMesh.material.opacity = Math.max(0.1, 0.6 - (activeCount / MAX_EXHAUST_PARTICLES_INSTANCED) * 0.5);
-
+            exhaustInstanceMesh.count = activeCountVisual;
+            if(activeCountVisual > 0) exhaustInstanceMesh.instanceMatrix.needsUpdate = true;
+            exhaustInstanceMesh.material.opacity = Math.max(0.1, 0.6 - (activeCountVisual / effectiveMaxExhaustParticles) * 0.5);
         }
 
 
         // --- Instanced Particle System: Skid Marks ---
         function createSkidMarkSystem_Instanced() {
-            if (skidInstanceMesh) scene.remove(skidInstanceMesh);
-            const skidGeo = new THREE.PlaneGeometry(0.4, 1.2); // Width, Length of skid mark
+            if (skidInstanceMesh) { scene.remove(skidInstanceMesh); skidInstanceMesh.geometry.dispose(); skidInstanceMesh.material.dispose(); }
+            const skidGeo = new THREE.PlaneGeometry(0.4, 1.2); 
             const skidMat = new THREE.MeshStandardMaterial({
                 color:0x1a1a1a, transparent:true, opacity:0.8,
-                roughness:0.9, depthWrite:false, side: THREE.DoubleSide
+                roughness:0.9, depthWrite:false, side: THREE.DoubleSide 
             });
-            skidInstanceMesh = new THREE.InstancedMesh(skidGeo, skidMat, MAX_SKID_MARKS_INSTANCED);
+            skidInstanceMesh = new THREE.InstancedMesh(skidGeo, skidMat, ABSOLUTE_MAX_SKID_MARKS);
             skidInstanceMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
             scene.add(skidInstanceMesh);
-            skidInstanceData = []; // { matrix, age, maxAge, active }
+            skidInstanceData = []; 
+            for(let i=0; i < ABSOLUTE_MAX_SKID_MARKS; ++i) {
+                 skidInstanceData.push({ matrix: new THREE.Matrix4(), age:0, maxAge:0, active:false});
+            }
             nextSkidMarkIndex = 0;
         }
 
         function addSkidMarkInstance_Instanced(worldPosition, carRotationY) {
             if (!skidInstanceMesh || !gameHasStartedAfterCountdown) return;
+            
+            // Check if we are exceeding effectiveMaxSkidMarks by counting active ones.
+            // This is tricky because we use a circular buffer (nextSkidMarkIndex).
+            // A simpler approach: if nextSkidMarkIndex is about to overwrite a still young particle
+            // and we are at capacity for mobile, maybe don't add one.
+            // For now, we'll rely on the fact that older marks fade.
+            // The primary constraint will be visual density.
 
-            const data = skidInstanceData[nextSkidMarkIndex];
-            if (!data) { // Initialize if not present
-                skidInstanceData[nextSkidMarkIndex] = { matrix: new THREE.Matrix4(), age:0, maxAge: 3 + Math.random()*2, active:false};
-            }
-            const currentData = skidInstanceData[nextSkidMarkIndex];
+            const currentData = skidInstanceData[nextSkidMarkIndex]; // Overwrite oldest or unused
             currentData.active = true;
             currentData.age = 0;
-            currentData.maxAge = 2.5 + Math.random()*1.5 + carVelocity * 0.5; // Longer skid at higher speed
+            currentData.maxAge = 2.5 + Math.random()*1.5 + carVelocity * 0.5;
 
             _tempObject.position.copy(worldPosition);
-            _tempObject.position.y = 0.011; // Slightly above road, above road lines
+            _tempObject.position.y = 0.011; 
 
-            // Apply car's overall rotation, then the skid's specific orientation
-            _tempEuler.set(-Math.PI / 2, 0, carRotationY - Math.PI/2); // Plane needs to be flat, then rotated
+            _tempEuler.set(-Math.PI / 2, 0, carRotationY - Math.PI/2); 
             _tempObject.quaternion.setFromEuler(_tempEuler);
-
-            _tempObject.scale.set(1,1,1); // Base scale
-
+            _tempObject.scale.set(1,1,1); 
             _tempObject.updateMatrix();
             currentData.matrix.copy(_tempObject.matrix);
 
-            nextSkidMarkIndex = (nextSkidMarkIndex + 1) % MAX_SKID_MARKS_INSTANCED;
+            nextSkidMarkIndex = (nextSkidMarkIndex + 1) % effectiveMaxSkidMarks; // Use effectiveMax for cycling index on mobile
+                                                                                // to reduce visual density faster
+            if (skidInstanceData.length < effectiveMaxSkidMarks && nextSkidMarkIndex >= skidInstanceData.length) {
+                 // This logic for populating skidInstanceData up to effectiveMaxSkidMarks
+                 // is not quite right with pre-sized array.
+                 // Better to always cycle through ABSOLUTE_MAX_SKID_MARKS using nextSkidMarkIndex % ABSOLUTE_MAX_SKID_MARKS
+                 // and control visual count in updateSkidMarks_Instanced.
+            }
+            // Corrected logic for circular buffer index:
+            nextSkidMarkIndex = (nextSkidMarkIndex + 1) % ABSOLUTE_MAX_SKID_MARKS;
+
         }
 
         function updateSkidMarks_Instanced(delta, worldMovementZ) {
             if (!skidInstanceMesh) return;
-            let activeCount = 0;
+            let activeCountVisual = 0;
             skidInstanceData.forEach(data => {
                 if(data.active) {
                     data.age += delta;
                     if (data.age > data.maxAge) {
-                        data.active = false; // Deactivate when too old
+                        data.active = false; 
                     } else {
-                        // Skid marks are static on the ground, their matrix doesn't change until they fade
-                        // However, they need to scroll with the world
-                        _tempObject.matrix.copy(data.matrix);
-                        _tempObject.matrix.decompose(_tempObject.position, _tempObject.quaternion, _tempObject.scale);
-                        _tempObject.position.z -= worldMovementZ; // Scroll with the world
+                        if (activeCountVisual < effectiveMaxSkidMarks) { // Only draw up to effective limit
+                            _tempObject.matrix.copy(data.matrix);
+                            _tempObject.matrix.decompose(_tempObject.position, _tempObject.quaternion, _tempObject.scale);
+                            _tempObject.position.z -= worldMovementZ; 
 
-                        // Fade out effect by scaling down or reducing opacity via shader attributes (more advanced)
-                        // Simple approach: could scale Y to 0, but that's not opacity.
-                        // For now, we rely on replacing old ones. True opacity fade needs shader work or individual materials.
+                            _tempObject.updateMatrix();
+                            data.matrix.copy(_tempObject.matrix);
 
-                        _tempObject.updateMatrix();
-                        data.matrix.copy(_tempObject.matrix);
-
-                        skidInstanceMesh.setMatrixAt(activeCount, data.matrix);
-                        activeCount++;
+                            skidInstanceMesh.setMatrixAt(activeCountVisual, data.matrix);
+                            activeCountVisual++;
+                        } else {
+                            // If we are over the effective limit for mobile, older "active" particles might not be drawn
+                            // This helps reduce overdraw if many skid marks were generated quickly.
+                            // To ensure they eventually fade, we could force them inactive sooner on mobile:
+                            if (reduceEnvironmentComplexityMobile && data.age > data.maxAge * 0.6) {
+                                data.active = false;
+                            }
+                        }
                     }
                 }
             });
-            skidInstanceMesh.count = activeCount;
-            if (activeCount > 0) skidInstanceMesh.instanceMatrix.needsUpdate = true;
+            skidInstanceMesh.count = activeCountVisual;
+            if (activeCountVisual > 0) skidInstanceMesh.instanceMatrix.needsUpdate = true;
         }
 
 
@@ -1808,31 +1878,33 @@
             if (!renderer || !scene || !camera || !carModel) return;
             if (stats) stats.begin();
 
-            if (currentPageId !== 'game-page' && !isGameOver) {
+            if (currentPageId !== 'game-page' && !isGameOver) { // Not on game page and not game over
                 if (stats) stats.end();
                 return;
             }
 
             const delta = clock.getDelta();
-            const nowTime = clock.elapsedTime * 1000;
+            const nowTime = clock.elapsedTime * 1000; // For UI throttle
 
             if (isCountingDown) {
-                if(renderer && scene && camera) renderer.render(scene, camera);
+                if(renderer && scene && camera) renderer.render(scene, camera); // Render scene during countdown
                 if (stats) stats.end();
                 return;
             }
 
-            if (isGameOver) {
+            if (isGameOver) { // Game is over, fade engine sound and render static scene
                 if (sounds.engine && sounds.engine.volume > 0.01) {
                     sounds.engine.volume -= 0.01;
                     sounds.engine.playbackRate = Math.max(0.1, sounds.engine.playbackRate - 0.01);
-                } else stopSound('engine');
+                } else if (sounds.engine) {
+                    stopSound('engine');
+                }
                 if(renderer && scene && camera) renderer.render(scene, camera);
                 if (stats) stats.end();
                 return;
             }
 
-            if (currentPageId !== 'game-page') { // Should be caught earlier, but as a safeguard
+            if (currentPageId !== 'game-page') { // Should be caught earlier, but safeguard
                  if (stats) stats.end();
                  return;
             }
@@ -1841,81 +1913,86 @@
             let prevCarVelocity = carVelocity;
             if (gameHasStartedAfterCountdown && !isGameOver) {
                 carVelocity = Math.min(carVelocity + carAcceleration, maxSpeed);
-            } else {
+            } else { // Should not happen if countdown leads to gameHasStartedAfterCountdown
                 carVelocity = Math.max(carVelocity - carDeceleration, 0);
             }
             let accelerationEffect = (delta > 0) ? (carVelocity - prevCarVelocity) / delta : 0;
 
             const actualSpeed = carVelocity * baseDriveSpeed;
-            const worldMovementZ = actualSpeed * delta * 60; // Normalize speed based on 60FPS delta
+            const worldMovementZ = actualSpeed * delta * 60; 
 
             if (gameHasStartedAfterCountdown && carVelocity > 0) {
-                distanceTraveled += worldMovementZ * 2; // Scale distance as desired
+                distanceTraveled += worldMovementZ * 2; 
             }
 
-            let targetRotationZ = 0;
-            const effectiveTurnSpeed = carTurnSpeed * (1 + carVelocity * 0.5);
-            playerBox.setFromObject(carModel); // More accurate AABB
+            let targetRotationZ = 0; // Car body roll
+            const effectiveTurnSpeed = carTurnSpeed * (1 + carVelocity * 0.5); // Faster turn at higher speed
+            if (carModel.geometry) playerBox.setFromObject(carModel); // Update player bounding box
+            else if (playerSize.x > 0) { // Fallback if carModel is group without immediate geometry
+                 const carPos = carModel.position;
+                 playerBox.min.set(carPos.x - playerSize.x/2, carPos.y - playerSize.y/2, carPos.z - playerSize.z/2);
+                 playerBox.max.set(carPos.x + playerSize.x/2, carPos.y + playerSize.y/2, carPos.z + playerSize.z/2);
+            }
+
             const carWidth = playerSize.x;
-            const maxBounds = roadWidth / 2 - kerbWidth - carWidth / 2 - 0.1;
-            let turningEffect = 0;
+            const maxBounds = roadWidth / 2 - kerbWidth - carWidth / 2 - 0.1; // Max X displacement
+            let turningEffect = 0; // For suspension
 
             if (gameHasStartedAfterCountdown && !isGameOver) {
                 let newX = carModel.position.x;
 
                 if (moveLeft) {
-                    newX -= effectiveTurnSpeed * delta * 60; // Normalize turn speed
-                    targetRotationZ = Math.PI / 20;
+                    newX -= effectiveTurnSpeed * delta * 60; 
+                    targetRotationZ = Math.PI / 20; // Roll left
                     turningEffect = -0.05;
                 }
                 if (moveRight) {
-                    newX += effectiveTurnSpeed * delta * 60; // Normalize turn speed
-                    targetRotationZ = -Math.PI / 20;
-                    turningEffect = 0.05; // Corrected sign for right turn effect
+                    newX += effectiveTurnSpeed * delta * 60; 
+                    targetRotationZ = -Math.PI / 20; // Roll right
+                    turningEffect = 0.05; 
                 }
 
 
-                if (newX >= -maxBounds && newX <= maxBounds) {
+                if (newX >= -maxBounds && newX <= maxBounds) { // Within road kerbs
                     carModel.position.x = newX;
                      if ((moveLeft || moveRight) && carVelocity > 0.3 && Date.now() - lastSkidTime > skidInterval) {
                         addSkidMarkInstance_Instanced(carModel.getWorldPosition(new THREE.Vector3()), carModel.rotation.y + targetRotationZ * 2.5);
                         lastSkidTime = Date.now();
                         if (sounds.skid && Math.random() < 0.3) playSound('skid', false, 0.3);
                     }
+                } else { // Clamped by kerbs
+                     carModel.position.x = THREE.MathUtils.clamp(carModel.position.x, -maxBounds, maxBounds);
                 }
-                 carModel.position.x = THREE.MathUtils.clamp(carModel.position.x, -maxBounds, maxBounds);
             }
 
 
-            carModel.rotation.z = THREE.MathUtils.lerp(carModel.rotation.z, targetRotationZ * carVelocity, 0.1);
+            carModel.rotation.z = THREE.MathUtils.lerp(carModel.rotation.z, targetRotationZ * carVelocity, 0.1); // Apply roll
 
+            // Suspension effect
             let force = -suspensionStiffness * carCurrentYOffset - suspensionDamping * suspensionVelocity + accelerationEffect * 0.005 + turningEffect * carVelocity * 0.1;
             suspensionVelocity += force * delta; carCurrentYOffset += suspensionVelocity * delta;
-            carCurrentYOffset = THREE.MathUtils.clamp(carCurrentYOffset, -0.05, 0.05);
+            carCurrentYOffset = THREE.MathUtils.clamp(carCurrentYOffset, -0.05, 0.05); // Limit suspension travel
             carModel.position.y = carBaseY + carCurrentYOffset;
 
-            // Scroll non-instanced objects
             const objectsToScroll = [ ...buildings, ...streetLights, ...trafficLights, ...kerbs, ...points ];
             if (enemyCar && enemyCar.visible) objectsToScroll.push(enemyCar);
             objectsToScroll.forEach(obj => obj.position.z -= worldMovementZ);
 
-            // Scroll Instanced Road Lines (by moving the entire InstancedMesh)
             if (roadLineInstanceMesh) {
                 roadLineInstanceMesh.position.z -= worldMovementZ;
-                if (roadLineInstanceMesh.position.z < -roadLength / 2 - 20) { // Recycle when half off-screen
-                    roadLineInstanceMesh.position.z += roadLength;
+                if (roadLineInstanceMesh.position.z < -roadLength / 2 - 20) { 
+                    roadLineInstanceMesh.position.z += roadLength; // Wrap around by one full road segment length
                 }
             }
 
 
-            const recycleThreshold = -roadLength / 2 - 20;
-            // roadLines.forEach(line => { if (line.position.z < recycleThreshold) line.position.z += roadLength; }); // Handled by roadLineInstanceMesh
-            kerbs.forEach(kerb => { if (kerb.position.z < recycleThreshold - roadLength / 2) kerb.position.z += roadLength * 2; }); // Kerbs are long, recycle full length
+            const recycleThreshold = -roadLength / 2 - 20; // Common Z threshold for recycling
+            kerbs.forEach(kerb => { if (kerb.position.z < recycleThreshold - roadLength / 2) kerb.position.z += roadLength * 2; }); 
             buildings.forEach(building => {
-                if (building.position.z < recycleThreshold - building.geometry.parameters.depth) {
-                    const currentBuildingSpacing = buildingSpacingBase * (reduceEnvironmentComplexityMobile ? 2.0 : 1.0);
-                    building.position.z += roadLength + Math.random() * currentBuildingSpacing * 1.5;
-                    const sideSign = Math.sign(building.position.x) || (Math.random() < 0.5 ? -1 : 1);
+                if (building.position.z < recycleThreshold - building.geometry.parameters.depth) { // Check based on building depth
+                    const currentBuildingSpacing = buildingSpacingBase * (reduceEnvironmentComplexityMobile ? 2.5 : 1.0);
+                    building.position.z += roadLength + Math.random() * currentBuildingSpacing * 1.5; // Reposition far ahead
+                    const sideSign = Math.sign(building.position.x) || (Math.random() < 0.5 ? -1 : 1); // Keep side or randomize
                     const xOffset = roadWidth / 2 + kerbWidth + 2 + Math.random() * 8 + building.geometry.parameters.width / 2;
                     building.position.x = sideSign * xOffset;
                 }
@@ -1925,46 +2002,59 @@
             points.forEach(point => { if (point.position.z < carModel.position.z - 20 && point.visible) resetPointPosition(point); });
 
 
-            updateDayCycleAndWeather(delta); // This will call updateRainParticles_Instanced
+            updateDayCycleAndWeather(delta); 
             updateEnemyAI(delta, worldMovementZ);
             updateExhaustParticles_Instanced(delta);
-            updateSkidMarks_Instanced(delta, worldMovementZ); // Skid marks also need to scroll
+            updateSkidMarks_Instanced(delta, worldMovementZ); 
 
 
+            // Camera follow logic
             const targetCameraPos = new THREE.Vector3( carModel.position.x*0.25, carModel.position.y + 2.5 + carVelocity*0.4, carModel.position.z - 6.5 - carVelocity*2.0 );
-            camera.position.lerp(targetCameraPos, 0.12);
+            camera.position.lerp(targetCameraPos, 0.12); // Smooth camera movement
             const lookAtPos = new THREE.Vector3( carModel.position.x*0.4, carModel.position.y + 1.0, carModel.position.z + 4.0 );
             camera.lookAt(lookAtPos);
-            camera.fov = THREE.MathUtils.lerp(camera.fov, baseFov + carVelocity * 8, 0.05);
+            camera.fov = THREE.MathUtils.lerp(camera.fov, baseFov + carVelocity * 8, 0.05); // Dynamic FOV
             camera.updateProjectionMatrix();
 
+            // Collision with points (coins)
             points.forEach(point => {
-                if (!point.visible) return; pointBox.setFromObject(point);
+                if (!point.visible) return; 
+                pointBox.setFromObject(point);
                 if (playerBox.intersectsBox(pointBox)) {
                     score += pointValue;
-                    // updateScoreDisplay(); // Throttled
                     point.visible = false;
                     if(sounds.collect) playSound('collect', false, 0.6);
-                    setTimeout(() => { if(!point.visible) resetPointPosition(point);}, 500 + Math.random()*1000);
+                    // Respawn coin after a delay
+                    setTimeout(() => { if(!point.visible && !isGameOver) resetPointPosition(point);}, 500 + Math.random()*1000);
                 }
             });
 
+            // Collision with enemy car
             if (enemyCar && enemyCar.visible) {
-                enemyBox.setFromObject(enemyCar); // More accurate AABB
+                if (enemyCar.geometry) enemyBox.setFromObject(enemyCar);
+                else if (enemySize.x > 0) { // Fallback if enemyCar is group without immediate geometry
+                     const enemyPos = enemyCar.position;
+                     enemyBox.min.set(enemyPos.x - enemySize.x/2, enemyPos.y - enemySize.y/2, enemyPos.z - enemySize.z/2);
+                     enemyBox.max.set(enemyPos.x + enemySize.x/2, enemyPos.y + enemySize.y/2, enemyPos.z + enemySize.z/2);
+                }
+
+
                 if (playerBox.intersectsBox(enemyBox)) handleGameOver();
-                else if (nearMissCooldown <= 0) {
-                    const distZ = Math.abs(carModel.position.z - enemyCar.position.z); const distX = Math.abs(carModel.position.x - enemyCar.position.x);
-                    const carCombinedHalfWidth = playerSize.x/2 + enemySize.x/2; const carCombinedHalfLength = playerSize.z/2 + enemySize.z/2;
+                else if (nearMissCooldown <= 0) { // Near miss detection
+                    const distZ = Math.abs(carModel.position.z - enemyCar.position.z); 
+                    const distX = Math.abs(carModel.position.x - enemyCar.position.x);
+                    const carCombinedHalfWidth = playerSize.x/2 + enemySize.x/2; 
+                    const carCombinedHalfLength = playerSize.z/2 + enemySize.z/2;
+                    // Check for close proximity for near miss
                     if (distZ < carCombinedHalfLength*1.5 && distX < carCombinedHalfWidth*1.8 && distX > carCombinedHalfWidth*0.9 && carVelocity > 0.3) {
                         score += nearMissBonus;
-                        // updateScoreDisplay(); // Throttled
-                        if(sounds.nearMiss) playSound('nearMiss', false, 0.4); nearMissCooldown = 1.5;
+                        if(sounds.nearMiss) playSound('nearMiss', false, 0.4); 
+                        nearMissCooldown = 1.5; // Cooldown for near miss bonus
                     }
                 }
             }
             if (nearMissCooldown > 0) nearMissCooldown -= delta;
 
-            // Throttled UI Updates
             if (nowTime - lastUiUpdateTime > UI_UPDATE_INTERVAL) {
                 updateScoreDisplay();
                 updateDistanceDisplay();
@@ -1985,6 +2075,7 @@
             gameOverElement.style.display = 'flex'; handleAdSlotVisibility('ad-slot-game-over');
             saveScoreToLeaderboard(currentPlayerName, Math.floor(distanceTraveled));
             if (sounds.rain) stopSound('rain');
+            // Engine sound fade out is handled in animate() loop when isGameOver is true
         }
 
         function saveScoreToLeaderboard(playerName, currentDistance) {
@@ -2000,7 +2091,7 @@
         function displayLeaderboard() {
             try {
                 const scoresJSON = localStorage.getItem(LEADERBOARD_KEY); const scores = scoresJSON ? JSON.parse(scoresJSON) : [];
-                leaderboardListElement.innerHTML = '';
+                leaderboardListElement.innerHTML = ''; // Clear previous list
                 if (scores.length > 0) {
                     noScoresMessageElement.style.display = 'none';
                     scores.forEach(scoreItem => {
@@ -2019,93 +2110,97 @@
         function updateDayCycleAndWeather(delta) {
             timeOfDay = 0.5; // Force daytime for performance
 
-            const sunAngle = (timeOfDay - 0.25) * Math.PI * 2;
-            let sunIntensity = Math.max(0, Math.sin(sunAngle));
-            let nightFactor = 1.0 - sunIntensity;
+            const sunAngle = (timeOfDay - 0.25) * Math.PI * 2; // Sun rises at 0.25, sets at 0.75
+            let sunIntensity = Math.max(0, Math.sin(sunAngle)); // Intensity based on sun angle
+            let nightFactor = 1.0 - sunIntensity; // How "night-like" it is
 
-            if (!ambientLight || !directionalLight || !scene.fog) return;
-            ambientLight.intensity = 0.4 + sunIntensity * 0.6;
-            directionalLight.intensity = 0.6 + sunIntensity * 1.2;
-            directionalLight.position.y = 50 + sunIntensity * 50;
+            if (!ambientLight || !directionalLight || !scene.fog || !scene.background) return; // Safety check
+            
+            ambientLight.intensity = 0.4 + sunIntensity * 0.6; // Ambient light based on sun
+            directionalLight.intensity = 0.6 + sunIntensity * 1.2; // Directional light based on sun
+            directionalLight.position.y = 50 + sunIntensity * 50; // Sun height
 
             if (lensflare) lensflare.visible = !reduceEnvironmentComplexityMobile && directionalLight.intensity > 0.1;
 
-            const dayColor = new THREE.Color(0xa0d7e6);
-            scene.background.copy(dayColor);
-            scene.fog.color.copy(dayColor);
+            const dayColor = new THREE.Color(0xa0d7e6); // Sky blue for day
+            // const nightColor = new THREE.Color(0x080f1a); // Dark blue for night (not used due to forced daytime)
+            // scene.background.lerpColors(nightColor, dayColor, sunIntensity);
+            // scene.fog.color.lerpColors(nightColor, dayColor, sunIntensity);
+            scene.background.copy(dayColor); // Forced daytime color
+            scene.fog.color.copy(dayColor);  // Forced daytime fog color
 
-            const fogFactor = 1.0 - sunIntensity * 0.5;
+            const fogFactor = 1.0 - sunIntensity * 0.5; // Fog increases slightly as sunIntensity drops (less relevant for forced day)
             scene.fog.near = baseFogNear * (0.6 + fogFactor * 0.4);
             scene.fog.far = baseFogFar * (0.85 + fogFactor * 0.15);
 
-            const isMobileDevice = reduceEnvironmentComplexityMobile;
-            streetLights.forEach(sl => {
-                sl.userData.fixture.material.emissiveIntensity = nightFactor * 1.5;
-                sl.userData.light.intensity = isMobileDevice ? nightFactor * 0.2 : nightFactor * 3;
-                sl.userData.light.visible = (nightFactor > 0.01);
+            const isMobile = reduceEnvironmentComplexityMobile; // Use consistent variable
+            streetLights.forEach(sl => { // Streetlight visuals (emissive part)
+                sl.userData.fixture.material.emissiveIntensity = nightFactor * 1.5; // Brighter emissive at night
+                sl.userData.light.intensity = isMobile ? nightFactor * 0.2 : nightFactor * 3; // Actual light source intensity
+                sl.userData.light.visible = (nightFactor > 0.01); // Only visible if it's somewhat dark
             });
 
-            if (headlightLeft) {
+            if (headlightLeft && taillightLeft) { // Car lights
                 let headLightBrightness = isRaining ? 0.8 : (nightFactor > 0.6 ? nightFactor * 1.5 : 0);
                 headlightLeft.intensity = headLightBrightness; headlightRight.intensity = headLightBrightness;
                 headlightLeft.visible = headLightBrightness > 0.01; headlightRight.visible = headLightBrightness > 0.01;
 
-                const baseTaillightIntensity = 0.5;
-                taillightLeft.intensity = baseTaillightIntensity + carVelocity*1.0;
+                const baseTaillightIntensity = 0.5; // Brake lights could increase this
+                taillightLeft.intensity = baseTaillightIntensity + carVelocity*1.0; // Brighter with speed/acceleration
                 taillightRight.intensity = baseTaillightIntensity + carVelocity*1.0;
             }
-            if(stars) stars.material.opacity = Math.max(0, nightFactor * 1.5 - 0.5);
+            if(stars && stars.material) stars.material.opacity = Math.max(0, nightFactor * 1.5 - 0.5); // Stars visible at night
 
-            if (cloudMaterial) cloudMaterial.opacity = 0.3 + sunIntensity * 0.4;
-            clouds.forEach(cloud => {
-                cloud.position.x += cloud.userData.speed * delta * 100;
-                if (cloud.position.x > roadLength * 1.2 + 50) {
+            if (cloudMaterial) cloudMaterial.opacity = 0.3 + sunIntensity * 0.4; // Cloud opacity
+            clouds.forEach(cloud => { // Cloud movement
+                cloud.position.x += cloud.userData.speed * delta * 100; // Move clouds
+                if (cloud.position.x > roadLength * 1.2 + 50) { // Recycle clouds
                     cloud.position.x = -roadLength*1.2-50; cloud.position.z = (Math.random()-0.5)*roadLength*1.5; cloud.position.y = Math.random()*20+40;
                 }
             });
 
-            // Rain Particle Update
             if (isRaining && gameHasStartedAfterCountdown) {
-                if (road && road.material.roughness > 0.2) road.material.roughness -= 0.01;
-                if (road && road.material.metalness < 0.4) road.material.metalness += 0.01;
-                updateRainParticles_Instanced(delta); // Calls the instanced rain update
-            } else {
-                if (road && road.material.roughness < 0.8) road.material.roughness += 0.01;
+                if (road && road.material.roughness > 0.2) road.material.roughness -= 0.01; // Road gets slicker
+                if (road && road.material.metalness < 0.4) road.material.metalness += 0.01; // Road gets shinier
+                updateRainParticles_Instanced(delta); 
+            } else { // Not raining
+                if (road && road.material.roughness < 0.8) road.material.roughness += 0.01; // Road dries
                 if (road && road.material.metalness > 0.1) road.material.metalness -= 0.01;
-                if (rainInstanceMesh) rainInstanceMesh.visible = false; // Hide rain if not raining
+                if (rainInstanceMesh) rainInstanceMesh.visible = false; 
             }
 
             if (currentPageId === 'game-page' && scene && scene.background) {
                 const gamePageDiv = document.getElementById('game-page');
-                if (gamePageDiv) gamePageDiv.style.backgroundColor = scene.background.getStyle();
+                if (gamePageDiv) gamePageDiv.style.backgroundColor = scene.background.getStyle(); // Sync page bg
             }
         }
 
         function updateEnemyAI(delta, worldMovementZ) {
             if (!enemyCar || !enemyCar.visible || !carModel || !gameHasStartedAfterCountdown) return;
-            // Enemy car's Z position is already updated in objectsToScroll
-            // const enemyActualSpeedOnRoad = baseDriveSpeed * enemyCarSpeedFactor;
-            // enemyCar.position.z -= enemyActualSpeedOnRoad * delta * 60; // Normalize speed // Handled by objectsToScroll
+            // Enemy car Z position is handled by general object scrolling in animate()
 
-            enemyLaneChangeTimer += delta * 1000;
+            enemyLaneChangeTimer += delta * 1000; // Timer for lane change decision
             if (enemyLaneChangeTimer >= enemyLaneChangeInterval) {
                 enemyLaneChangeTimer = 0;
-                if (Math.random() < enemyLaneChangeProbability) enemyTargetX = (Math.random() < 0.5 ? -1 : 1) * (roadWidth / 4);
+                if (Math.random() < enemyLaneChangeProbability) enemyTargetX = (Math.random() < 0.5 ? -1 : 1) * (roadWidth / 4); // Pick new lane
             }
-            enemyCar.position.x = THREE.MathUtils.lerp(enemyCar.position.x, enemyTargetX, 0.03);
-            if (enemyCar.position.z < carModel.position.z - 40) resetEnemyCar();
+            enemyCar.position.x = THREE.MathUtils.lerp(enemyCar.position.x, enemyTargetX, 0.03); // Smoothly move to target lane
+            if (enemyCar.position.z < carModel.position.z - 40) resetEnemyCar(); // Recycle if far behind player
         }
 
         function playSound(soundName, loop = false, volume = null) {
             if (sounds[soundName] && typeof Audio !== "undefined" ) {
                 sounds[soundName].loop = loop; const S = sounds[soundName];
-                let baseVolume = soundName === 'engine' ? 0.3 : 0.5;
-                S.volume = volume !== null ? volume * baseVolume : baseVolume;
+                let baseVolume = soundName === 'engine' ? 0.3 : 0.5; // Default volumes
+                S.volume = volume !== null ? volume * baseVolume : baseVolume; // Apply custom volume or default
+                
+                // Play only if on game page, not game over, and not counting down (for looped sounds)
+                // Non-looped sounds (like collect) can play during countdown briefly
                 if ( (currentPageId === 'game-page' && !isGameOver && (!isCountingDown || !loop)) || !loop ) {
-                    if (S.paused || !loop || S.currentTime > 0) {
+                    if (S.paused || !loop || S.currentTime > 0) { // Check if paused or if it's a non-looped sound that can replay
                         const playPromise = S.play();
                         if (playPromise !== undefined) {
-                            playPromise.catch(e => { /* console.warn('Audio play prevented:', e) */ });
+                            playPromise.catch(e => { /* console.warn('Audio play prevented for ' + soundName + ':', e) */ });
                         }
                     }
                 }
@@ -2114,7 +2209,8 @@
 
         function stopSound(soundName) {
             if (sounds[soundName] && typeof Audio !== "undefined") {
-                sounds[soundName].pause(); sounds[soundName].currentTime = 0;
+                sounds[soundName].pause(); 
+                if (sounds[soundName].currentTime > 0) sounds[soundName].currentTime = 0; // Reset time for next play
             }
         }
 
@@ -2123,18 +2219,20 @@
                 const minPlaybackRate = 0.5, maxPlaybackRate = 2.0;
                 const targetPlaybackRate = minPlaybackRate + (carVelocity/maxSpeed * (maxPlaybackRate - minPlaybackRate));
                 sounds.engine.playbackRate = THREE.MathUtils.lerp( sounds.engine.playbackRate || 1.0, targetPlaybackRate, 0.15 );
-                const baseEngineVolume = 0.3, minVolume = 0.2, maxVolume = 0.8;
-                const dynamicVolumeFactor = minVolume + (carVelocity/maxSpeed * (maxVolume - minVolume));
-                let targetVolume = Math.min(baseEngineVolume * dynamicVolumeFactor, 1.0);
+                
+                const baseEngineVolume = 0.3, minVolumeFactor = 0.2, maxVolumeFactor = 0.8;
+                const dynamicVolumeFactor = minVolumeFactor + (carVelocity/maxSpeed * (maxVolumeFactor - minVolumeFactor));
+                let targetVolume = Math.min(baseEngineVolume * dynamicVolumeFactor, 1.0); // Cap volume
                 sounds.engine.volume = THREE.MathUtils.lerp( sounds.engine.volume || baseEngineVolume, targetVolume, 0.1 );
-                if (sounds.engine.paused && sounds.engine.volume > 0.01 && carVelocity > 0.01) {
+
+                if (sounds.engine.paused && sounds.engine.volume > 0.01 && carVelocity > 0.01) { // If paused but should be playing
                     const playPromise = sounds.engine.play();
                     if (playPromise !== undefined) {
-                        playPromise.catch(e => {/* console.warn('Engine sound play prevented:', e) */});
+                        playPromise.catch(e => {/* console.warn('Engine sound play prevented on update:', e) */});
                     }
                 }
             } else if (sounds.engine && (isGameOver || currentPageId !== 'game-page' || !gameHasStartedAfterCountdown)) {
-                 stopSound('engine');
+                 stopSound('engine'); // Stop if game over, not on game page, or not started
             }
         }
 
