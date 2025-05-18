@@ -236,7 +236,7 @@
             padding: 0;
             overflow: hidden;
             background-color: #a0d7e6; /* Initial, will be updated by JS */
-            touch-action: none; /* Important for mobile */
+            touch-action: none; /* Important for mobile page-level gestures */
         }
 
         #loading-screen {
@@ -345,16 +345,16 @@
 
         .control-button {
             position: absolute;
-            width: 65px;
-            height: 65px;
+            width: 70px;
+            height: 70px;
             background-color: rgba(200, 200, 200, 0.45);
-            border: 1px solid rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.3);
             border-radius: 50%;
             z-index: 60;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 2em; /* For ◀ ▶ */
+            font-size: 2.2em;
             color: rgba(0, 0, 0, 0.8);
             cursor: pointer;
             user-select: none;
@@ -362,13 +362,58 @@
             -ms-user-select: none;
             -moz-user-select: none;
             -webkit-tap-highlight-color: transparent;
-            transition: background-color 0.1s;
+            transition: all 0.1s ease;
+            touch-action: none;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
+
         .control-button:active {
             background-color: rgba(255, 255, 255, 0.65);
+            transform: scale(0.95);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
         }
-        #left-button { left: 20px; bottom: 110px; }
-        #right-button { right: 20px; bottom: 110px; }
+
+        #left-button { 
+            left: 25px; 
+            bottom: 120px; 
+        }
+
+        #right-button { 
+            right: 25px; 
+            bottom: 120px; 
+        }
+
+        @media (max-width: 768px) {
+            .control-button {
+                width: 65px;
+                height: 65px;
+                font-size: 2em;
+            }
+            #left-button { 
+                left: 20px; 
+                bottom: 110px; 
+            }
+            #right-button { 
+                right: 20px; 
+                bottom: 110px; 
+            }
+        }
+
+        @media (max-width: 480px) {
+            .control-button {
+                width: 60px;
+                height: 60px;
+                font-size: 1.8em;
+            }
+            #left-button { 
+                left: 15px; 
+                bottom: 100px; 
+            }
+            #right-button { 
+                right: 15px; 
+                bottom: 100px; 
+            }
+        }
 
 
         /* Leaderboard Page Styles */
@@ -696,7 +741,7 @@
             if (pageId === 'game-page') {
                 document.body.style.overflow = 'hidden';
                 pageContainer.style.overflowY = 'hidden';
-                if (gamePage) gamePage.style.touchAction = 'none';
+                if (gamePage) gamePage.style.touchAction = 'none'; // Already present, good for page level
                 if (stats) stats.dom.style.display = 'block';
             } else {
                 document.body.style.overflow = 'auto';
@@ -932,16 +977,20 @@
             const isMobileDevice = window.innerWidth <= 768;
             reduceEnvironmentComplexityMobile = isMobileDevice;
 
-            // effectiveMax... constants for particles are now managed by MAX_..._INSTANCED for InstancedMesh
-            // We still use reduceEnvironmentComplexityMobile for geometry detail of procedural items
-
             if (renderer) {
-                const pixelRatio = Math.min(window.devicePixelRatio, isMobileDevice ? 1.0 : 1.5);
+                // Increase pixel ratio for better graphics
+                const pixelRatio = Math.min(window.devicePixelRatio, isMobileDevice ? 1.5 : 2.0);
                 renderer.setPixelRatio(pixelRatio);
+                
+                // Enable antialiasing for better graphics
+                renderer.setSize(window.innerWidth, window.innerHeight);
+                renderer.shadowMap.enabled = true;
+                renderer.shadowMap.type = THREE.PCFSoftShadowMap; // Better shadow quality
             }
 
             if (directionalLight && directionalLight.shadow) {
-                const shadowMapSize = isMobileDevice ? 256 : 512; // Reduced from 1024
+                // Increase shadow map size for better quality
+                const shadowMapSize = isMobileDevice ? 512 : 1024;
                 if (directionalLight.shadow.mapSize.width !== shadowMapSize) {
                     directionalLight.shadow.mapSize.width = shadowMapSize;
                     directionalLight.shadow.mapSize.height = shadowMapSize;
@@ -951,19 +1000,17 @@
                     }
                 }
             }
-            if (lensflare) {
-                lensflare.visible = !isMobileDevice;
-            }
 
+            // Adjust environment complexity based on device
             if (reduceEnvironmentComplexityMobile) {
-                effectiveNumBuildings = Math.floor(roadLength / (buildingSpacingBase * 2.0));
-                effectiveNumLights = Math.floor(roadLength / (lightSpacingBase * 1.8));
-                effectiveNumClouds = 5;
-                effectiveNumStars = 70;
+                effectiveNumBuildings = Math.floor(roadLength / (buildingSpacingBase * 1.5));
+                effectiveNumLights = Math.floor(roadLength / (lightSpacingBase * 1.5));
+                effectiveNumClouds = 8;
+                effectiveNumStars = 100;
             } else {
                 effectiveNumBuildings = Math.floor(roadLength / buildingSpacingBase);
                 effectiveNumLights = Math.floor(roadLength / lightSpacingBase);
-                effectiveNumClouds = 15;
+                effectiveNumClouds = 20;
                 effectiveNumStars = numStarsBase;
             }
         }
@@ -1022,13 +1069,17 @@
 
             const isMobileForRenderer = window.innerWidth <= 768;
             try {
-                renderer = new THREE.WebGLRenderer({ antialias: !isMobileForRenderer, alpha: true });
-                updatePerformanceSettings(); // Call this before renderer.setSize
+                renderer = new THREE.WebGLRenderer({ 
+                    antialias: true, 
+                    alpha: true,
+                    powerPreference: "high-performance"
+                });
+                updatePerformanceSettings();
                 renderer.setSize(window.innerWidth, window.innerHeight);
                 renderer.shadowMap.enabled = true;
-                renderer.shadowMap.type = THREE.PCFShadowMap;
+                renderer.shadowMap.type = THREE.PCFSoftShadowMap;
                 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-                renderer.toneMappingExposure = 1.0;
+                renderer.toneMappingExposure = 1.2; // Slightly increased for better visibility
                 const container = document.getElementById('container');
                 container.innerHTML = '';
                 container.appendChild(renderer.domElement);
@@ -1354,7 +1405,7 @@
                 switch (event.key.toLowerCase()) {
                     case 'arrowleft': case 'a': moveLeft = true; break;
                     case 'arrowright': case 'd': moveRight = true; break;
-                    case 'r': isRaining = !isRaining; updateRainSound(); break; // Toggle rain
+                    case 'r': isRaining = !isRaining; updateRainSound(); break;
                 }
             });
             window.addEventListener('keyup', (event) => {
@@ -1364,23 +1415,66 @@
                     case 'arrowright': case 'd': moveRight = false; break;
                 }
             });
+
             const leftBtn = document.getElementById('left-button');
             const rightBtn = document.getElementById('right-button');
 
-            const safeAddEventListener = (element, eventTypeStart, eventTypeEnd, handlerStart, handlerEnd) => {
-                if (element) {
-                    element.addEventListener(eventTypeStart, (e) => {
-                        if (!isGameOver && !isCountingDown && currentPageId === 'game-page') {
-                            e.preventDefault(); handlerStart();
-                        }}, { passive: false });
-                    element.addEventListener(eventTypeEnd, (e) => {
-                        if (currentPageId === 'game-page') {
-                             e.preventDefault(); handlerEnd();
-                        }}, { passive: false });
+            // Prevent default touch behaviors on the game page
+            const gamePage = document.getElementById('game-page');
+            if (gamePage) {
+                gamePage.addEventListener('touchmove', (e) => {
+                    if (currentPageId === 'game-page') {
+                        e.preventDefault();
+                    }
+                }, { passive: false });
+            }
+
+            // Improved touch event handling
+            const handleTouchStart = (e, direction) => {
+                if (!isGameOver && !isCountingDown && currentPageId === 'game-page') {
+                    e.preventDefault();
+                    if (direction === 'left') moveLeft = true;
+                    if (direction === 'right') moveRight = true;
                 }
             };
-            safeAddEventListener(leftBtn, 'touchstart', 'touchend', () => moveLeft = true, () => moveLeft = false);
-            safeAddEventListener(rightBtn, 'touchstart', 'touchend', () => moveRight = true, () => moveRight = false);
+
+            const handleTouchEnd = (e, direction) => {
+                if (currentPageId === 'game-page') {
+                    e.preventDefault();
+                    if (direction === 'left') moveLeft = false;
+                    if (direction === 'right') moveRight = false;
+                }
+            };
+
+            // Add touch events with proper handling
+            if (leftBtn) {
+                leftBtn.addEventListener('touchstart', (e) => handleTouchStart(e, 'left'), { passive: false });
+                leftBtn.addEventListener('touchend', (e) => handleTouchEnd(e, 'left'), { passive: false });
+                leftBtn.addEventListener('touchcancel', (e) => handleTouchEnd(e, 'left'), { passive: false });
+            }
+
+            if (rightBtn) {
+                rightBtn.addEventListener('touchstart', (e) => handleTouchStart(e, 'right'), { passive: false });
+                rightBtn.addEventListener('touchend', (e) => handleTouchEnd(e, 'right'), { passive: false });
+                rightBtn.addEventListener('touchcancel', (e) => handleTouchEnd(e, 'right'), { passive: false });
+            }
+
+            // Add visual feedback for touch controls
+            const addTouchFeedback = (button) => {
+                if (!button) return;
+                button.addEventListener('touchstart', () => {
+                    button.style.backgroundColor = 'rgba(255, 255, 255, 0.65)';
+                }, { passive: true });
+                button.addEventListener('touchend', () => {
+                    button.style.backgroundColor = 'rgba(200, 200, 200, 0.45)';
+                }, { passive: true });
+                button.addEventListener('touchcancel', () => {
+                    button.style.backgroundColor = 'rgba(200, 200, 200, 0.45)';
+                }, { passive: true });
+            };
+
+            addTouchFeedback(leftBtn);
+            addTouchFeedback(rightBtn);
         }
 
         function updateRainSound() {
